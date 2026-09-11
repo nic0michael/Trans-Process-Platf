@@ -88,7 +88,7 @@ But to enable external systems to call this. To identify external systems, we wi
   
 ---
 ## 2026-09-11 18:26
-Nico proposed that we accept his design for the API project as provided in this UML Artifact:
+Nico proposed that we accept his design for the API project as provided in this UML Artifact: \
 [https://github.com/nic0michael/Trans-Process-Platf/blob/master/backend/api/The_API_Design.md](https://github.com/nic0michael/Trans-Process-Platf/blob/master/backend/api/The_API_Design.md)
 
 ---
