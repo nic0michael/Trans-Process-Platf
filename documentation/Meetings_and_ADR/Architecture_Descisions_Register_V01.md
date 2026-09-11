@@ -3,23 +3,27 @@ We agreed to implement the changes from previour ADR
 Refer to Specifications_v01
 
 ---
-
-**2026-09-11 09:47**
-Nico requested instructions for installing Kafka as a docker container running in a VM using a docker compose file
-### ADR-025 — Local Kafka Development Environment agreed upon
+## 2026-09-11 08:00
+The DevOps team informed me that they use Kafka, not RabbitMQ, and they use Gradle instead of Maven 
 
 ---
+## 2026-09-11 09:30
+We agreed to implement these changes
 
+---
+## 2026-09-11 09:47
+Nico requested instructions for installing Kafka as a docker container running in a VM using a docker compose file to run in Proxmox
+
+---
+## 2026-09-11 10;48
+Nico requested instructions for installing PostgreSQL server as a docker container running in a VM using a docker compose file to run in Proxmox
 
 ---
  
 ## 2026-09-11 14:47
 Nico proposed we use the following structure for the Transactions (as messages)
-
-# Transaction Message Structure
-
-Nico proposes that the platform use the previous structure for a Transaction message.
 But to enable external systems to call this. To identify external systems, we will use an uppercase string externalSystemId
+### Transaction Message Structure
  **We now have these fields:**
 
 | Field                    | Java Type       | Database Type   | Description                                          |
