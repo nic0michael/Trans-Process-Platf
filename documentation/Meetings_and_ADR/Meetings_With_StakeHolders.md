@@ -42,7 +42,7 @@ Nico proposes that the platform use the following structure for a Transaction me
 | `companyId`              | `Long`          | `BIGINT`        | Company associated with the transaction             |
 | `status`                 | `String` / Enum | `VARCHAR`       | Current processing status                           |
 
-Status is an Enum with these values:
+**Status is an Enum with these values:**
 - RECEIVED
 - VALIDATED
 - QUEUED
