@@ -1,4 +1,4 @@
-Please note that in this diagram, the **ExternalSystem** class represents an **External System** or the Frontend **Angular System**
+Please note that, in this diagram, the **ExternalSystem** class represents an **External System** or the Frontend **Angular System**
 ```mermaid id="8n4q2m"
 classDiagram
 
