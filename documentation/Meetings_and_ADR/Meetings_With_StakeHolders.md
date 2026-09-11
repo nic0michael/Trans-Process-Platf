@@ -21,3 +21,35 @@ Nico requested instructions for installing PostgreSQL server as a docker contain
 
 ---
 
+## 2026-09-11 14:11
+Nico proposed we use the following structure for the Transactions (as messages)
+
+# Transaction Message Structure
+
+Nico proposes that the platform use the following structure for a Transaction message.
+
+| Field                    | Java Type       | Database Type   | Description                                         |
+| ------------------------ | --------------- | --------------- | --------------------------------------------------- |
+| `timestamp`              | `LocalDateTime` | `TIMESTAMP`     | Transaction timestamp, format `YYYY-MM-dd HH:mm:ss` |
+| `transactionIndex`       | `Long`          | `BIGINT`        | Database-generated transaction identifier           |
+| `transactionGuid`        | `UUID`          | `UUID`          | Globally unique transaction identifier              |
+| `requestId`              | `UUID`          | `UUID`          | Unique idempotency/request identifier               |
+| `transactionType`        | `String` / Enum | `VARCHAR`       | `SALE` or `PURCHASE`                                |
+| `currency`               | `String`        | `CHAR(3)`       | ISO currency code, e.g. `ZAR`, `USD`                |
+| `amount`                 | `BigDecimal`    | `DECIMAL(19,4)` | Monetary transaction amount                         |
+| `reference`              | `String`        | `VARCHAR(100)`  | External/business reference                         |
+| `transactionDescription` | `String`        | `VARCHAR(500)`  | Description of the transaction                      |
+| `companyId`              | `Long`          | `BIGINT`        | Company associated with the transaction             |
+| `status`                 | `String` / Enum | `VARCHAR`       | Current processing status                           |
+
+Status is an Enum with these values:
+- RECEIVED
+- VALIDATED
+- QUEUED
+- PROCESSING
+- COMPLETED
+- FAILED
+- DEAD_LETTER
+
+---
+
