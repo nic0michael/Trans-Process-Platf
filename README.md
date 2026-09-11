@@ -1,7 +1,3 @@
-Absolutely. I checked the repository as well; it is currently empty, so this README can establish the project's design-first direction from the beginning. ([GitHub][1])
-
-I have kept the ADR discussion deliberately short, as requested. The emphasis is on **architecture, design, and the engineering problem being solved**.
-
 # Transaction Processing Platform
 
 **Short name:** `Trans-Process-Platf`
