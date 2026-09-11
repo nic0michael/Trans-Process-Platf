@@ -1,0 +1,123 @@
+plugins {
+    id 'java' apply false
+    id 'java-library' apply false
+    id 'org.springframework.boot' version '4.1.1' apply false
+    id 'org.sonarqube' version '7.3.1.8318'
+    id 'jacoco'
+}
+
+group = 'com.nm.tranproc'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+sonar {
+    properties {
+        property 'sonar.projectKey', 'trans-process-platf'
+        property 'sonar.projectName', 'Trans-Process-Platf'
+        property 'sonar.sourceEncoding', 'UTF-8'
+
+        // Change this if your SonarQube server is elsewhere
+        property 'sonar.host.url',
+                System.getenv('SONAR_HOST_URL') ?: 'http://localhost:9000'
+
+        property 'sonar.coverage.exclusions', [
+                '**/dto/**',
+                '**/config/**',
+                '**/exception/**'
+        ].join(',')
+    }
+}
+
+/*
+ * Java sub-projects
+ */
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+
+    group = rootProject.group
+    version = rootProject.version
+
+    repositories {
+        mavenCentral()
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    dependencies {
+
+        // Unit testing
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+
+        testImplementation 'org.assertj:assertj-core'
+
+        testImplementation 'org.mockito:mockito-core'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+
+        finalizedBy tasks.named('jacocoTestReport')
+    }
+
+    jacoco {
+        toolVersion = '0.8.14'
+    }
+
+    tasks.named('jacocoTestReport') {
+        dependsOn tasks.named('test')
+
+        reports {
+            xml.required = true
+            html.required = true
+            csv.required = false
+        }
+    }
+
+    /*
+     * Minimum unit-test coverage.
+     *
+     * This deliberately makes coverage part of the build.
+     * We can change 0.80 later if required.
+     */
+    tasks.named('jacocoTestCoverageVerification') {
+
+        violationRules {
+
+            rule {
+                limit {
+                    counter = 'LINE'
+                    value = 'COVEREDRATIO'
+                    minimum = 0.80
+                }
+            }
+
+            rule {
+                limit {
+                    counter = 'BRANCH'
+                    value = 'COVEREDRATIO'
+                    minimum = 0.70
+                }
+            }
+        }
+    }
+
+    tasks.named('check') {
+        dependsOn tasks.named('jacocoTestCoverageVerification')
+    }
+}
+

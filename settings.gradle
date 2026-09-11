@@ -1,0 +1,5 @@
+rootProject.name = 'Trans-Process-Platf'
+
+include 'backend:api'
+include 'backend:processor'
+include 'backend:common'
