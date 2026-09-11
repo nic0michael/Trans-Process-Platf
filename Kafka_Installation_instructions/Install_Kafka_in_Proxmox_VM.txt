@@ -1,0 +1,489 @@
+# Nico's Java Project — Architecture Meeting
+
+**ADR Change Timestamp: 2026-09-11 09:47**
+
+### ADR-025 — Local Kafka Development Environment
+
+**Decision:**
+Nico requested that Kafka be installed as a **Docker container inside a VM**, using a **Docker Compose file**.
+
+For the project, use the official Apache Kafka Docker image:
+
+```text
+apache/kafka:4.3.1
+```
+
+Apache currently lists Kafka **4.3.1** as the latest supported release, and its official Docker documentation provides the `apache/kafka:4.3.1` image. ([Apache Kafka][1])
+
+Kafka 4.x uses **KRaft**, so a separate ZooKeeper container is not required. The official Docker guidance also uses KRaft for the local Docker setup. ([Docker Documentation][2])
+
+---
+
+# 1. Target Environment
+
+The architecture is:
+
+```text
+Physical Laptop
+       |
+       v
+      VM
+       |
+       +-------------------------+
+       |                         |
+       |        Docker           |
+       |                         |
+       |   +-----------------+   |
+       |   | Kafka Container |   |
+       |   +-----------------+   |
+       |                         |
+       +-------------------------+
+```
+
+The Kafka VM is therefore isolated from the laptop's operating system.
+
+---
+
+# 2. VM Requirements
+
+Inside the VM, install:
+
+```text
+Docker
+Docker Compose
+```
+
+Verify:
+
+```bash
+docker --version
+docker compose version
+```
+
+Create the project directory:
+
+```bash
+mkdir -p ~/kafka
+cd ~/kafka
+```
+
+---
+
+# 3. Docker Compose File
+
+Create:
+
+```text
+compose.yaml
+```
+
+Use:
+
+```yaml
+services:
+
+  kafka:
+    image: apache/kafka:4.3.1
+    container_name: nicos-kafka
+
+    ports:
+      - "9092:9092"
+
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://<VM-IP>:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+volumes:
+  kafka_data:
+```
+
+Replace:
+
+```text
+<VM-IP>
+```
+
+with the VM's IP address.
+
+For example:
+
+```yaml
+KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.50:9092
+```
+
+The important point is that Kafka clients outside the container must receive an address they can actually reach. Docker's Kafka guidance specifically distinguishes the listener used by host clients from the listener used by containers on the Docker network. ([Docker Documentation][2])
+
+---
+
+# 4. Start Kafka
+
+From the VM:
+
+```bash
+cd ~/kafka
+
+docker compose up -d
+```
+
+Check:
+
+```bash
+docker compose ps
+```
+
+Expected:
+
+```text
+nicos-kafka    running
+```
+
+Check the logs:
+
+```bash
+docker compose logs -f kafka
+```
+
+Kafka's official documentation confirms that the official JVM Docker image can be run directly with port `9092`. ([Apache Kafka][3])
+
+---
+
+# 5. Verify Kafka
+
+Check the container:
+
+```bash
+docker exec -it nicos-kafka \
+  /opt/kafka/bin/kafka-broker-api-versions.sh \
+  --bootstrap-server localhost:9092
+```
+
+If Kafka is running correctly, the command should return broker/API information.
+
+---
+
+# 6. Create the Project Topic
+
+Create the initial topic:
+
+```bash
+docker exec -it nicos-kafka \
+  /opt/kafka/bin/kafka-topics.sh \
+  --create \
+  --topic transaction-events \
+  --bootstrap-server localhost:9092 \
+  --partitions 4 \
+  --replication-factor 1
+```
+
+Verify:
+
+```bash
+docker exec -it nicos-kafka \
+  /opt/kafka/bin/kafka-topics.sh \
+  --describe \
+  --topic transaction-events \
+  --bootstrap-server localhost:9092
+```
+
+The project specification calls for multiple partitions because partitioning is part of our Kafka architecture. Kafka's own quickstart demonstrates creating and describing topics with the Kafka command-line tools. ([Apache Kafka][4])
+
+---
+
+# 7. Create the Other Project Topics
+
+Create:
+
+```text
+transaction-events
+transaction-retry
+transaction-dlq
+transaction-results
+```
+
+The initial development environment should use:
+
+```text
+4 partitions
+1 replica
+```
+
+because this is a **single-node laptop development environment**.
+
+This is deliberately different from the eventual production architecture.
+
+---
+
+# 8. VM Network Requirement
+
+The VM must allow access to:
+
+```text
+TCP 9092
+```
+
+from whatever machine will run the Java application.
+
+For example:
+
+```text
+Laptop
+   |
+   | TCP 9092
+   v
+VM
+   |
+   v
+Docker
+   |
+   v
+Kafka
+```
+
+If the Java application is also running inside Docker **on the same VM**, it should use the Docker service name rather than the VM IP.
+
+For example:
+
+```text
+kafka:9092
+```
+
+The distinction between host access and Docker-network access is important in Kafka because the broker advertises connection addresses to clients. Docker's official Kafka guide specifically calls out this listener issue. ([Docker Documentation][2])
+
+---
+
+# 9. Test Producer
+
+Run:
+
+```bash
+docker exec -it nicos-kafka \
+  /opt/kafka/bin/kafka-console-producer.sh \
+  --topic transaction-events \
+  --bootstrap-server localhost:9092
+```
+
+Enter:
+
+```text
+TEST-TRANSACTION-001
+```
+
+Then:
+
+```text
+TEST-TRANSACTION-002
+```
+
+---
+
+# 10. Test Consumer
+
+Open another terminal and run:
+
+```bash
+docker exec -it nicos-kafka \
+  /opt/kafka/bin/kafka-console-consumer.sh \
+  --topic transaction-events \
+  --bootstrap-server localhost:9092 \
+  --from-beginning
+```
+
+You should see:
+
+```text
+TEST-TRANSACTION-001
+TEST-TRANSACTION-002
+```
+
+This confirms:
+
+```text
+Producer
+   |
+   v
+Kafka Topic
+   |
+   v
+Consumer
+```
+
+is working.
+
+---
+
+# 11. Verify Partitioning
+
+Describe the topic:
+
+```bash
+docker exec -it nicos-kafka \
+  /opt/kafka/bin/kafka-topics.sh \
+  --describe \
+  --topic transaction-events \
+  --bootstrap-server localhost:9092
+```
+
+The result should show:
+
+```text
+Partition: 0
+Partition: 1
+Partition: 2
+Partition: 3
+```
+
+This is important because **partitioning is now an explicit part of our project architecture**.
+
+---
+
+# 12. Persistence
+
+The Compose configuration contains:
+
+```yaml
+volumes:
+  - kafka_data:/var/lib/kafka/data
+```
+
+Therefore Kafka's data is stored in a Docker volume rather than disappearing when the container is recreated.
+
+Check it with:
+
+```bash
+docker volume ls
+```
+
+---
+
+# 13. Stop and Restart Test
+
+Stop Kafka:
+
+```bash
+docker compose down
+```
+
+Start it again:
+
+```bash
+docker compose up -d
+```
+
+Then check:
+
+```bash
+docker compose ps
+```
+
+The Kafka container should return to the running state.
+
+**Do not use `docker compose down -v` during normal testing**, because that removes the Docker volume and therefore the Kafka data.
+
+---
+
+# 14. Architecture Decision
+
+The development architecture is therefore:
+
+```text
+                    LAPTOP
+                       |
+                       v
+                      VM
+                       |
+                 Docker Engine
+                       |
+          +------------+------------+
+          |                         |
+          v                         v
+     Kafka Container          Future Containers
+          |
+          +-- transaction-events
+          |       |
+          |       +-- P0
+          |       +-- P1
+          |       +-- P2
+          |       +-- P3
+          |
+          +-- transaction-retry
+          |
+          +-- transaction-dlq
+          |
+          +-- transaction-results
+```
+
+### Important
+
+This is a **single-node Kafka development environment**, not a production Kafka cluster.
+
+That is intentional.
+
+It gives us a realistic Kafka environment on the laptop while keeping the project manageable.
+
+The eventual Kubernetes architecture can introduce multiple Kafka brokers and replication when we reach that phase.
+
+---
+
+# 15. ADR-025 Record
+
+```text
+ADR-025 — Local Kafka Development Environment
+
+Date:
+2026-09-11 09:47
+
+Status:
+Accepted
+
+Decision:
+
+Kafka will run inside a VM as a Docker container.
+
+Docker Compose will be used to define and manage the Kafka
+development environment.
+
+The official Apache Kafka Docker image will be used:
+
+apache/kafka:4.3.1
+
+Kafka will run in KRaft mode.
+
+ZooKeeper will not be used.
+
+The development environment will use a single Kafka broker
+with four partitions for the primary transaction topic.
+
+Kafka data will be persisted using a Docker volume.
+
+The development environment is intended for local development
+and testing and is not a production Kafka topology.
+```
+
+This is consistent with the current Apache Kafka Docker documentation, which provides the official `apache/kafka:4.3.1` image and the current Kafka release information. ([Apache Kafka][3])
+
+[Apache Kafka Docker documentation](https://kafka.apache.org/43/getting-started/docker/?utm_source=chatgpt.com)
+
+[1]: https://kafka.apache.org/community/downloads/?utm_source=chatgpt.com "Downloads | Apache Kafka"
+[2]: https://docs.docker.com/guides/kafka/?utm_source=chatgpt.com "Developing event-driven applications with Kafka and Docker | Docker Docs"
+[3]: https://kafka.apache.org/43/getting-started/docker/?utm_source=chatgpt.com "Docker | Apache Kafka"
+[4]: https://kafka.apache.org/quickstart/?utm_source=chatgpt.com "Quickstart | Apache Kafka"
+

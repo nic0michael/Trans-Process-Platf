@@ -1,0 +1,1874 @@
+# Nico's Java Project
+
+Yes. I read the feedback as a whole rather than treating each test separately.
+
+The strongest project for you is **not just a CRUD application**. It should be a realistic **transaction-processing platform** that deliberately exercises the areas the interviewers identified while also allowing you to demonstrate your existing strengths.
+
+## Recommended project
+
+### **Nico Transaction Processing Platform — NTP**
+
+A Java/Angular application for submitting and processing **customer transactions asynchronously**.
+
+The system will accept transactions through a REST API, validate them, persist them, publish processing events through RabbitMQ, process them asynchronously, prevent duplicate processing, record the result, and expose the status through an Angular dashboard.
+
+It is deliberately designed to demonstrate:
+
+* Java core knowledge
+* Spring Boot
+* REST
+* Angular
+* PostgreSQL
+* SQL indexes and query optimisation
+* RabbitMQ
+* asynchronous processing
+* Outbox Pattern
+* idempotency
+* database constraints
+* retry and dead-letter processing
+* service virtualization
+* fault injection
+* contract testing
+* unit/integration testing
+* Docker
+* Docker Compose
+* observability
+* metrics
+* logging
+* distributed-system thinking
+* API validation
+* error handling
+* concurrency
+* HashMap/equals/hashCode concepts
+* Kubernetes-ready architecture
+* CI/CD-ready structure
+
+This is also a **useful portfolio project**, because it resembles the type of transaction-processing backend found in banking, payments, insurance and other enterprise environments without becoming tied to one particular company.
+
+---
+
+# 1. Project objective
+
+Build a small but production-style transaction platform.
+
+A user submits:
+
+```text
+Customer
+Transaction Reference
+Transaction Type
+Amount
+Currency
+```
+
+The system:
+
+```text
+Angular
+   |
+   v
+REST API
+   |
+   v
+Validation
+   |
+   v
+PostgreSQL
+   |
+   v
+Outbox
+   |
+   v
+RabbitMQ
+   |
+   v
+Transaction Processor
+   |
+   +----> Success
+   |
+   +----> Retry
+   |
+   +----> Dead Letter
+   |
+   v
+PostgreSQL
+   |
+   v
+Angular Dashboard
+```
+
+The important point is that the API **does not perform the complete transaction synchronously**.
+
+It accepts the request, records it, and returns a transaction ID.
+
+Processing happens asynchronously.
+
+---
+
+# 2. Why this project fits the feedback
+
+| Feedback area            | Project feature                                       |
+| ------------------------ | ----------------------------------------------------- |
+| Java core constructs     | Domain objects, `equals()`, `hashCode()`, collections |
+| HashMap                  | Processing/idempotency cache                          |
+| LinkedList               | Queue-related Java exercise/tests                     |
+| Data structures          | Dedicated algorithm component                         |
+| Async processing         | RabbitMQ                                              |
+| Event loop understanding | Async consumer architecture                           |
+| API validation           | Spring validation                                     |
+| Central error formatting | Global exception handler                              |
+| Database indexes         | Transaction queries                                   |
+| Composite indexes        | Customer/status/date searches                         |
+| Performance              | Large transaction dataset                             |
+| Sorting                  | Transaction dashboard/report                          |
+| Greedy algorithm         | Processing priority allocation                        |
+| Idempotency              | Request ID + DB constraint                            |
+| Scalable architecture    | Stateless processors                                  |
+| Autoscaling              | Multiple processor containers                         |
+| Readiness                | Spring Actuator                                       |
+| Secrets                  | Environment configuration                             |
+| Queues                   | RabbitMQ                                              |
+| Retry                    | Retry queue                                           |
+| Dead letter              | DLQ                                                   |
+| Observability            | Logs + metrics + traces                               |
+| Kubernetes               | Kubernetes deployment specifications                  |
+| Ingress                  | Architecture/design only initially                    |
+| CI/CD                    | Pipeline-ready project                                |
+| Rollback                 | Versioned Docker images                               |
+| Service virtualization   | Mock external service                                 |
+| Fault injection          | Controlled processor failures                         |
+| Contract testing         | API contracts                                         |
+| TDD                      | Tests written before implementation                   |
+| Angular                  | Full frontend                                         |
+| Docker                   | Entire environment                                    |
+| Gradle                   | Java build                                            |
+| SonarQube                | Static analysis                                       |
+| JaCoCo                   | Coverage                                              |
+| JMeter                   | Load testing                                          |
+
+That gives you a project that directly answers many of the interview weaknesses.
+
+---
+
+# 3. Technology stack
+
+## Backend
+
+* Java 21
+* Spring Boot
+* Spring Web
+* Spring Data JPA
+* Spring Validation
+* Spring AMQP
+* Spring Actuator
+* PostgreSQL
+* RabbitMQ
+* Gradle
+
+Spring Boot currently has stable 4.x releases, and the Gradle plugin supports Gradle 8.14+ and Gradle 9.x. ([Home][1])
+
+**Decision:** use **Java 21 + Spring Boot 4.x + Gradle 9.x** unless a compatibility issue during implementation gives us a reason to change.
+
+---
+
+# 4. Frontend
+
+Use:
+
+* Angular 22
+* TypeScript
+* RxJS
+* Angular HttpClient
+* Angular routing
+* Reactive forms
+
+Angular 22 is currently the active release line, according to Angular's release documentation. ([Angular][2])
+
+The Angular application should provide:
+
+```text
+Dashboard
+Transactions
+Transaction Details
+Processing Queue
+Failures
+System Health
+```
+
+---
+
+# 5. Infrastructure
+
+Docker containers:
+
+```text
+ntp-frontend
+ntp-api
+ntp-processor
+ntp-postgres
+ntp-rabbitmq
+ntp-prometheus
+ntp-grafana
+```
+
+Possibly later:
+
+```text
+ntp-mock-service
+ntp-sonarqube
+```
+
+Docker Compose is particularly suitable here because the entire multi-container environment can be defined in a Compose file and started as one application stack. ([Docker Documentation][3])
+
+---
+
+# 6. The most important Architecture Decision
+
+## Start as a modular distributed application
+
+I **do not recommend starting with 10 microservices**.
+
+That would create unnecessary complexity.
+
+Instead:
+
+```text
+                     +----------------+
+                     |    Angular     |
+                     +-------+--------+
+                             |
+                             v
+                     +---------------+
+                     |   API Service |
+                     +-------+-------+
+                             |
+                   +---------+---------+
+                   |                   |
+                   v                   v
+              PostgreSQL          Outbox
+                                       |
+                                       v
+                                  RabbitMQ
+                                       |
+                                       v
+                              +----------------+
+                              |   Processor    |
+                              +-------+--------+
+                                      |
+                                      v
+                                 PostgreSQL
+```
+
+The API and Processor are separate deployable applications.
+
+This is enough to demonstrate distributed processing without turning the project into a massive undertaking.
+
+---
+
+# 7. Architecture Decision Records
+
+Create an `/architecture/adr` directory.
+
+The project should contain ADRs for at least:
+
+```text
+ADR-001 Java 21
+ADR-002 Spring Boot
+ADR-003 Gradle
+ADR-004 Angular
+ADR-005 PostgreSQL
+ADR-006 RabbitMQ
+ADR-007 Asynchronous Processing
+ADR-008 Outbox Pattern
+ADR-009 Idempotency Strategy
+ADR-010 Database Index Strategy
+ADR-011 Retry Strategy
+ADR-012 Dead Letter Strategy
+ADR-013 API Error Model
+ADR-014 Authentication Strategy
+ADR-015 Observability
+ADR-016 Docker Compose
+ADR-017 Service Virtualization
+ADR-018 Contract Testing
+ADR-019 Fault Injection
+ADR-020 Kubernetes Deployment
+```
+
+Each ADR should contain:
+
+```text
+Status
+Context
+Decision
+Options Considered
+Advantages
+Disadvantages
+Consequences
+```
+
+This directly reinforces your architecture experience.
+
+---
+
+# 8. Functional requirements
+
+## FR-001 Submit transaction
+
+The system shall allow a user to submit a transaction.
+
+Example:
+
+```json
+{
+  "requestId": "8c4d...",
+  "customerId": "CUST-10001",
+  "transactionType": "PAYMENT",
+  "amount": 1250.50,
+  "currency": "ZAR"
+}
+```
+
+---
+
+## FR-002 Validate transaction
+
+Validation must include:
+
+* request ID required
+* customer ID required
+* transaction type required
+* amount required
+* amount > 0
+* currency required
+* supported currency
+* maximum transaction amount
+
+Invalid requests must never enter the processing queue.
+
+---
+
+# 9. Transaction states
+
+Use an explicit state model.
+
+```text
+RECEIVED
+   |
+   v
+VALIDATED
+   |
+   v
+QUEUED
+   |
+   v
+PROCESSING
+   |
+   +----------+
+   |          |
+   v          v
+COMPLETED   FAILED
+              |
+              v
+            RETRY
+              |
+        +-----+-----+
+        |           |
+        v           v
+   PROCESSING     DEAD_LETTER
+```
+
+The state transitions must be controlled.
+
+Invalid transitions must be rejected.
+
+This gives you a good opportunity to use the **State pattern**.
+
+---
+
+# 10. Idempotency
+
+This is one of the project's major features.
+
+Every request contains:
+
+```text
+requestId
+```
+
+The database must enforce:
+
+```text
+UNIQUE(request_id)
+```
+
+If the same request is submitted twice:
+
+```text
+Request 1 -> process
+Request 2 -> detect duplicate
+```
+
+The transaction must **not be processed twice**.
+
+This directly demonstrates one of your existing strengths.
+
+---
+
+# 11. Outbox Pattern
+
+This should be a central architectural feature.
+
+When the transaction is accepted:
+
+```text
+BEGIN TRANSACTION
+
+INSERT transaction
+
+INSERT outbox_event
+
+COMMIT
+```
+
+The application must never have:
+
+```text
+database commit
+     +
+RabbitMQ publish
+```
+
+as two unrelated operations.
+
+The Outbox ensures the event is persisted with the transaction.
+
+Then an Outbox Publisher publishes:
+
+```text
+Outbox
+   |
+   v
+RabbitMQ
+```
+
+This also gives you another excellent interview discussion topic.
+
+---
+
+# 12. RabbitMQ
+
+RabbitMQ will provide asynchronous processing.
+
+Suggested logical structure:
+
+```text
+transaction.exchange
+
+        |
+        +---- transaction.queue
+        |
+        +---- retry.queue
+        |
+        +---- dead-letter.queue
+```
+
+Messages contain:
+
+```text
+transactionId
+requestId
+eventType
+timestamp
+attempt
+```
+
+---
+
+# 13. Retry architecture
+
+A transaction that temporarily fails should not immediately become permanently failed.
+
+Example:
+
+```text
+Attempt 1
+   |
+   v
+FAIL
+   |
+   v
+Retry
+
+Attempt 2
+   |
+   v
+FAIL
+   |
+   v
+Retry
+
+Attempt 3
+   |
+   v
+FAIL
+   |
+   v
+DLQ
+```
+
+Maximum attempts:
+
+```text
+3
+```
+
+This should be configurable.
+
+---
+
+# 14. Dead Letter Queue
+
+Messages that cannot be processed after the configured number of attempts go to:
+
+```text
+transaction.dlq
+```
+
+The Angular application should show:
+
+```text
+Dead Letter Transactions
+```
+
+with:
+
+* transaction ID
+* request ID
+* failure reason
+* number of attempts
+* timestamp
+* status
+
+---
+
+# 15. Fault injection
+
+This is one of the most important additions based on the interview feedback.
+
+The processor should have a **test-only failure mechanism**.
+
+For example:
+
+```text
+NORMAL
+FAIL_ONCE
+FAIL_ALWAYS
+SLOW_PROCESSING
+```
+
+This allows you to demonstrate:
+
+```text
+successful processing
+retry
+dead letter
+timeout
+slow consumer
+```
+
+without needing an unreliable external system.
+
+This directly addresses the feedback about **fault injection** and deterministic testing.
+
+---
+
+# 16. Service virtualization
+
+Create a simulated external service:
+
+```text
+Risk Evaluation Service
+```
+
+The Transaction Processor calls it.
+
+Example:
+
+```text
+Transaction Processor
+        |
+        v
+Risk Service
+        |
+        +---- APPROVED
+        +---- DECLINED
+        +---- TIMEOUT
+        +---- HTTP 500
+        +---- SLOW
+```
+
+The service must be configurable.
+
+This gives you a practical example of **service virtualization**.
+
+---
+
+# 17. Contract testing
+
+Define the API contract.
+
+At minimum:
+
+```text
+POST /api/transactions
+GET  /api/transactions/{id}
+GET  /api/transactions
+GET  /api/transactions/{id}/status
+```
+
+The API contract becomes a formal artifact.
+
+The Angular application and backend should both conform to it.
+
+---
+
+# 18. Database model
+
+Initial database model:
+
+```text
+customer
+---------
+id
+customer_number
+name
+created_at
+
+
+transaction
+-----------
+id
+request_id
+customer_id
+transaction_type
+amount
+currency
+status
+attempt_count
+created_at
+updated_at
+completed_at
+failure_reason
+
+
+outbox_event
+------------
+id
+aggregate_id
+event_type
+payload
+created_at
+published_at
+
+
+processing_attempt
+------------------
+id
+transaction_id
+attempt_number
+started_at
+completed_at
+status
+error_message
+```
+
+---
+
+# 19. Database indexes
+
+This is deliberately included because of the feedback.
+
+At minimum:
+
+```text
+transaction(request_id)
+transaction(customer_id)
+transaction(status)
+transaction(created_at)
+```
+
+Composite indexes should be justified through actual query requirements.
+
+For example:
+
+```text
+(customer_id, created_at)
+(status, created_at)
+(status, customer_id, created_at)
+```
+
+But **do not automatically create all of these**.
+
+One of the architecture/design exercises should be:
+
+> Which indexes are actually required and why?
+
+That gives you a concrete interview discussion around composite indexing and query optimisation.
+
+---
+
+# 20. Query requirements
+
+The system must support:
+
+### Query 1
+
+Find transaction by request ID.
+
+```text
+request_id
+```
+
+### Query 2
+
+Customer transaction history.
+
+```text
+customer_id
+ORDER BY created_at DESC
+```
+
+### Query 3
+
+Failed transactions.
+
+```text
+status = FAILED
+ORDER BY created_at DESC
+```
+
+### Query 4
+
+Transactions waiting for processing.
+
+```text
+status = QUEUED
+ORDER BY created_at
+```
+
+### Query 5
+
+Dashboard statistics.
+
+```text
+COUNT
+GROUP BY status
+```
+
+These queries become the basis for your indexing and performance testing.
+
+---
+
+# 21. API error model
+
+Every error should have the same structure.
+
+Example:
+
+```json
+{
+  "timestamp": "...",
+  "status": 400,
+  "error": "VALIDATION_ERROR",
+  "message": "Invalid transaction",
+  "path": "/api/transactions",
+  "correlationId": "..."
+}
+```
+
+No controller should invent its own error format.
+
+---
+
+# 22. Correlation ID
+
+Every request should have:
+
+```text
+correlationId
+```
+
+The ID must appear in:
+
+```text
+HTTP response
+application logs
+RabbitMQ message
+processor logs
+database processing record
+```
+
+This becomes extremely useful when demonstrating distributed troubleshooting.
+
+---
+
+# 23. Observability
+
+Implement:
+
+### Logs
+
+Structured logs containing:
+
+```text
+timestamp
+level
+service
+correlationId
+transactionId
+requestId
+message
+```
+
+### Metrics
+
+Examples:
+
+```text
+transactions.received
+transactions.completed
+transactions.failed
+transactions.retried
+transactions.deadlettered
+transaction.processing.time
+rabbitmq.queue.depth
+```
+
+Spring Boot's current observability model uses Micrometer for metrics and observations, and Actuator exposes application health and metrics capabilities. ([Home][4])
+
+---
+
+# 24. Health endpoints
+
+Expose:
+
+```text
+/actuator/health
+/actuator/info
+/actuator/metrics
+/prometheus
+```
+
+Health should distinguish between:
+
+```text
+UP
+DOWN
+DEGRADED
+```
+
+The application should report dependencies such as:
+
+```text
+PostgreSQL
+RabbitMQ
+Risk Service
+```
+
+---
+
+# 25. Angular dashboard
+
+The dashboard should display:
+
+```text
++---------------------------------------+
+| NTP Transaction Dashboard             |
++---------------------------------------+
+| Received     12,450                    |
+| Processing      37                     |
+| Completed   11,982                     |
+| Failed         91                      |
+| DLQ            14                      |
++---------------------------------------+
+
+Processing Rate
+Queue Depth
+Failure Rate
+Average Processing Time
+```
+
+---
+
+# 26. Angular transaction screen
+
+Columns:
+
+```text
+Transaction ID
+Customer
+Amount
+Currency
+Status
+Attempts
+Created
+Updated
+```
+
+Filtering:
+
+```text
+Customer
+Status
+Date range
+Transaction type
+```
+
+Sorting:
+
+```text
+Created
+Amount
+Status
+```
+
+Pagination is required.
+
+This gives you an opportunity to demonstrate Angular rather than only having a simple CRUD UI.
+
+---
+
+# 27. Transaction detail
+
+Display:
+
+```text
+Transaction
+-----------
+
+ID
+Request ID
+Customer
+Amount
+Currency
+Status
+
+Processing History
+------------------
+
+Attempt 1
+Attempt 2
+Attempt 3
+
+Events
+------
+
+Transaction Received
+Transaction Queued
+Transaction Processing
+Transaction Completed
+```
+
+This makes the asynchronous architecture visible.
+
+---
+
+# 28. Java core learning requirements
+
+The project should deliberately include a small `core` module/package containing examples/tests for:
+
+### `equals()` / `hashCode()`
+
+Use a domain object as a `HashMap` key.
+
+Tests must demonstrate:
+
+```text
+equal objects
+different objects
+HashMap lookup
+HashSet behaviour
+```
+
+### HashMap
+
+Document:
+
+```text
+hash
+bucket
+collision
+equals()
+```
+
+### LinkedList
+
+Have a small algorithm exercise demonstrating:
+
+```text
+node
+next
+traversal
+insert
+remove
+```
+
+### Interface features
+
+Include an interface demonstrating appropriate use of:
+
+```text
+default
+static
+private
+```
+
+methods.
+
+The goal isn't to artificially use these features throughout the application.
+
+The goal is to have **clear, testable examples you can explain in an interview**.
+
+---
+
+# 29. Algorithms component
+
+Create a small `algorithm` package.
+
+It should contain exercises involving:
+
+```text
+sorting
+filtering
+greedy selection
+HashMap
+LinkedList
+queues
+priority queues
+```
+
+One practical requirement:
+
+> Given a set of pending transactions and a processing capacity, determine which transactions should be processed first according to defined business priority rules.
+
+This gives you a concrete opportunity to discuss:
+
+```text
+algorithm
+complexity
+sorting
+greedy choice
+performance
+```
+
+---
+
+# 30. Testing architecture
+
+This project should have an unusually strong testing strategy.
+
+## Unit tests
+
+Use:
+
+```text
+JUnit
+Mockito
+AssertJ
+```
+
+Test:
+
+```text
+business rules
+validation
+state transitions
+idempotency
+retry decisions
+algorithm logic
+```
+
+---
+
+# 31. Integration tests
+
+Use a real:
+
+```text
+PostgreSQL
+RabbitMQ
+```
+
+rather than mocking everything.
+
+The test should verify:
+
+```text
+API
+   |
+   v
+Database
+   |
+   v
+RabbitMQ
+   |
+   v
+Processor
+   |
+   v
+Database
+```
+
+This is much more valuable than a huge collection of mocked tests.
+
+---
+
+# 32. Testcontainers
+
+The integration test environment should eventually use containers for:
+
+```text
+PostgreSQL
+RabbitMQ
+```
+
+This gives you reproducible integration testing.
+
+---
+
+# 33. Contract tests
+
+Test:
+
+```text
+API request
+API response
+error response
+status response
+```
+
+Contract tests should detect accidental API changes.
+
+---
+
+# 34. Fault tests
+
+Create deterministic tests such as:
+
+```text
+Risk service returns 500
+Risk service times out
+Risk service is slow
+RabbitMQ unavailable
+Database unavailable
+Duplicate request
+Processor failure
+```
+
+Expected outcomes must be explicit.
+
+Example:
+
+```text
+FAIL_ONCE
+
+Expected:
+attempt = 2
+final status = COMPLETED
+```
+
+And:
+
+```text
+FAIL_ALWAYS
+
+Expected:
+attempt = 3
+final status = DEAD_LETTER
+```
+
+---
+
+# 35. Performance testing
+
+JMeter should be part of the project.
+
+Tests should measure:
+
+```text
+100 requests
+1,000 requests
+10,000 requests
+```
+
+Measure:
+
+```text
+requests/second
+average response
+95th percentile
+99th percentile
+error rate
+queue depth
+processing time
+```
+
+The interesting architectural point is:
+
+> The API response time should remain relatively independent of the actual transaction processing time because processing is asynchronous.
+
+That gives you an excellent performance discussion.
+
+---
+
+# 36. Concurrency tests
+
+Specifically test:
+
+```text
+100 identical requests
+```
+
+using the same:
+
+```text
+requestId
+```
+
+Expected:
+
+```text
+1 transaction
+1 successful processing
+99 duplicate responses
+```
+
+This is a very strong demonstration of your existing idempotency knowledge.
+
+---
+
+# 37. Docker architecture
+
+The complete application should eventually run with:
+
+```text
+docker compose up
+```
+
+Docker Compose is specifically intended for defining multi-container applications, networks and volumes in one configuration. ([Docker Documentation][3])
+
+Logical architecture:
+
+```text
+                    Browser
+                       |
+                       v
+                 Angular/Nginx
+                       |
+                       v
+                 +-----------+
+                 | API       |
+                 +-----+-----+
+                       |
+             +---------+---------+
+             |                   |
+             v                   v
+        PostgreSQL           RabbitMQ
+                                 |
+                                 v
+                            Processor
+                                 |
+                                 v
+                            PostgreSQL
+
+Monitoring:
+
+API ----------+
+Processor ----+----> Prometheus ----> Grafana
+RabbitMQ -----+
+```
+
+---
+
+# 38. Kubernetes preparation
+
+You specifically received feedback that your Kubernetes explanations needed more concrete detail.
+
+Therefore the project should eventually contain:
+
+```text
+k8s/
+```
+
+with:
+
+```text
+namespace.yaml
+
+api/
+    deployment.yaml
+    service.yaml
+    configmap.yaml
+    secret.yaml
+
+processor/
+    deployment.yaml
+    service.yaml
+    configmap.yaml
+    secret.yaml
+
+postgres/
+rabbitmq/
+
+ingress.yaml
+hpa.yaml
+```
+
+But **Kubernetes is not required for the first implementation**.
+
+The application must first work correctly under Docker Compose.
+
+---
+
+# 39. Kubernetes requirements
+
+The design must support:
+
+### API
+
+```text
+replicas: 2
+```
+
+### Processor
+
+```text
+replicas: 2
+```
+
+### Readiness
+
+Application must not receive traffic until ready.
+
+### Liveness
+
+Application must be restarted if unhealthy.
+
+### HPA
+
+Processor scaling should eventually be based on workload.
+
+Conceptually:
+
+```text
+RabbitMQ queue grows
+        |
+        v
+More processor replicas
+        |
+        v
+Queue decreases
+        |
+        v
+Scale down
+```
+
+That directly addresses the Kubernetes/autoscaling feedback.
+
+---
+
+# 40. Ingress
+
+The Kubernetes architecture should contain:
+
+```text
+Internet
+   |
+   v
+Ingress
+   |
+   v
+Angular/API
+```
+
+You should be able to explain:
+
+```text
+DNS
+TLS
+Ingress
+Service
+Pod
+```
+
+as one request path.
+
+---
+
+# 41. Secrets
+
+No passwords in:
+
+```text
+Dockerfile
+Git
+application.yml
+Kubernetes manifests
+```
+
+Use environment variables locally.
+
+Later:
+
+```text
+Docker secrets
+Kubernetes Secrets
+```
+
+This reinforces the infrastructure/security strengths mentioned in your feedback.
+
+---
+
+# 42. CI/CD design
+
+The repository should eventually contain:
+
+```text
+Build
+  |
+  v
+Unit Tests
+  |
+  v
+Integration Tests
+  |
+  v
+JaCoCo
+  |
+  v
+SonarQube
+  |
+  v
+Docker Build
+  |
+  v
+Image Scan
+  |
+  v
+Deploy
+```
+
+Deployment instructions can be added later, as you requested.
+
+---
+
+# 43. Rollback requirement
+
+The deployment design must support:
+
+```text
+version 1.0
+version 1.1
+version 1.2
+```
+
+If version 1.2 fails:
+
+```text
+rollback -> 1.1
+```
+
+This can later be demonstrated with Docker tags and Kubernetes/Helm.
+
+---
+
+# 44. Project structure
+
+I recommend:
+
+```text
+nicos-java-project/
+│
+├── architecture/
+│   ├── adr/
+│   ├── diagrams/
+│   └── requirements/
+│
+├── backend/
+│   ├── api/
+│   ├── processor/
+│   └── common/
+│
+├── frontend/
+│   └── angular/
+│
+├── tests/
+│   ├── integration/
+│   ├── contract/
+│   ├── performance/
+│   └── fault-injection/
+│
+├── infrastructure/
+│   ├── docker/
+│   ├── compose/
+│   └── kubernetes/
+│
+├── docs/
+│
+├── gradle/
+├── build.gradle
+├── settings.gradle
+├── compose.yaml
+└── README.md
+```
+
+---
+
+# 45. Gradle structure
+
+Use a multi-project Gradle build:
+
+```text
+nicos-java-project
+│
+├── backend-api
+├── backend-processor
+├── backend-common
+└── backend-test-support
+```
+
+This gives you useful experience with Gradle multi-project builds rather than only a single `build.gradle`.
+
+---
+
+# 46. Non-functional requirements
+
+## Performance
+
+API:
+
+```text
+p95 < 500 ms
+```
+
+under normal local load.
+
+Processing:
+
+```text
+100+ transactions/minute
+```
+
+on a laptop should be achievable.
+
+---
+
+## Reliability
+
+The system shall:
+
+* survive processor restart
+* retry failed messages
+* prevent duplicate transactions
+* preserve unprocessed transactions
+* move permanently failed messages to DLQ
+
+---
+
+## Security
+
+The system shall:
+
+* validate all input
+* never trust client-supplied state
+* avoid credentials in source code
+* use role-based access concepts
+* protect administrative endpoints
+
+---
+
+## Maintainability
+
+Required:
+
+```text
+clear packages
+small classes
+SOLID principles
+ADR documentation
+automated tests
+static analysis
+code coverage
+```
+
+---
+
+# 47. Architecture diagrams
+
+The architecture phase should produce at least:
+
+### C4 Context
+
+```text
+User
+ |
+ v
+NTP
+ |
+ +---- External Risk Service
+```
+
+### C4 Container
+
+```text
+Angular
+API
+Processor
+PostgreSQL
+RabbitMQ
+Risk Service
+Monitoring
+```
+
+### Component diagrams
+
+For:
+
+```text
+API
+Transaction Processor
+Outbox Publisher
+```
+
+### Sequence diagrams
+
+At least:
+
+```text
+Successful transaction
+Duplicate transaction
+Retry
+Dead letter
+```
+
+### Deployment diagram
+
+Docker:
+
+```text
+Laptop
+ |
+ +-- Angular
+ +-- API
+ +-- Processor
+ +-- PostgreSQL
+ +-- RabbitMQ
+ +-- Prometheus
+ +-- Grafana
+```
+
+Later Kubernetes:
+
+```text
+Kubernetes Cluster
+ |
+ +-- Ingress
+ +-- API Pods
+ +-- Processor Pods
+ +-- RabbitMQ
+ +-- PostgreSQL
+```
+
+---
+
+# 48. Design patterns deliberately covered
+
+The project should include:
+
+| Pattern         | Where                        |
+| --------------- | ---------------------------- |
+| Outbox          | Transaction events           |
+| State           | Transaction states           |
+| Strategy        | Transaction processing rules |
+| Factory         | Processor creation           |
+| Observer        | Processing events            |
+| Decorator       | Processing instrumentation   |
+| Repository      | Database access              |
+| Adapter         | External Risk Service        |
+| Retry           | Failed processing            |
+| Circuit Breaker | External service             |
+| DTO             | API boundary                 |
+
+This also gives you material for the design-pattern interview questions you have been practising.
+
+---
+
+# 49. What this project should NOT become
+
+There are some things I deliberately recommend **not** adding initially:
+
+```text
+Kafka
+Redis
+MongoDB
+Elasticsearch
+Kubernetes cluster
+AWS
+Azure
+multiple databases
+10 microservices
+OAuth server
+complex event sourcing
+CQRS everywhere
+```
+
+Those technologies would make the project impressive-looking but would dilute the purpose.
+
+The project is supposed to demonstrate **depth**, not technology collection.
+
+---
+
+# 50. Laptop requirement
+
+The initial target is:
+
+```text
+One laptop
+Docker
+Docker Compose
+Java 21
+Gradle
+Node.js
+Angular
+```
+
+The application must be runnable without cloud infrastructure.
+
+A reasonable initial Docker stack is:
+
+```text
+Angular
+API
+Processor
+PostgreSQL
+RabbitMQ
+```
+
+Then monitoring can be added.
+
+Docker Compose is particularly appropriate because it allows the complete environment to be defined as services, networks and volumes and started together. ([Docker Documentation][3])
+
+---
+
+# 51. Development phases
+
+I recommend the project specification be implemented in these phases:
+
+```text
+PHASE 1
+Requirements
+Architecture
+ADRs
+C4 diagrams
+
+        ↓
+
+PHASE 2
+Domain model
+Database model
+API contract
+
+        ↓
+
+PHASE 3
+TDD
+Core transaction functionality
+
+        ↓
+
+PHASE 4
+Angular application
+
+        ↓
+
+PHASE 5
+RabbitMQ
+Asynchronous processing
+
+        ↓
+
+PHASE 6
+Outbox
+Idempotency
+Retry
+DLQ
+
+        ↓
+
+PHASE 7
+Integration testing
+Contract testing
+Fault injection
+
+        ↓
+
+PHASE 8
+Observability
+
+        ↓
+
+PHASE 9
+Docker Compose
+
+        ↓
+
+PHASE 10
+JMeter/performance
+
+        ↓
+
+PHASE 11
+Kubernetes design
+
+        ↓
+
+PHASE 12
+CI/CD and deployment
+```
+
+---
+
+# 52. Most important point
+
+I would make **this project your interview demonstration project**.
+
+It gives you a story like:
+
+> "I designed a transaction-processing platform. The REST API is deliberately asynchronous. I used PostgreSQL for durable state, RabbitMQ for decoupling, the Outbox Pattern to reliably publish events, and an idempotency key to prevent duplicate processing. I added retries and a dead-letter queue for failures. I tested it with unit, integration, contract and fault-injection tests, then containerised the whole system with Docker Compose and designed the deployment for Kubernetes."
+
+That single project lets you talk about **Java, Angular, databases, algorithms, testing, distributed systems, RabbitMQ, Docker, Kubernetes, observability and architecture** from something you actually built.
+
+And importantly, it fits your existing strengths rather than pretending you are a completely different developer.
+
+### One final technology recommendation
+
+For monitoring, I strongly recommend **Prometheus + Grafana** rather than building your own monitoring screen first. Spring Boot/Micrometer already provides a natural metrics path, including Prometheus support. ([Home][5])
+
+---
+
+## About the chat name
+
+I can't directly rename the ChatGPT conversation from inside the response. The name I recommend using is:
+
+**Nico's Java Project**
+
+I will treat **Nico's Java Project** as the project name from here onward.
+
+And I will follow your instruction: **I won't give you implementation instructions unless you specifically tell me that you are stuck.** From here, you can ask me to work on the **Architecture phase, requirements, ADRs, diagrams, TDD specification, or another project artifact**, and we can do it step by step.
+
+[1]: https://docs.spring.io/spring-boot/reference/?utm_source=chatgpt.com "Reference :: Spring Boot"
+[2]: https://angular.dev/reference/releases?utm_source=chatgpt.com "Versioning and releases • Angular"
+[3]: https://docs.docker.com/compose?utm_source=chatgpt.com "Docker Compose | Docker Docs"
+[4]: https://docs.spring.io/spring-boot/reference/actuator/observability.html?utm_source=chatgpt.com "Observability :: Spring Boot"
+[5]: https://docs.spring.io/spring-boot/reference/actuator/metrics.html?utm_source=chatgpt.com "Metrics :: Spring Boot"
+
