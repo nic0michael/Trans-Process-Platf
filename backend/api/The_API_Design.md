@@ -1,32 +1,51 @@
 ```mermaid
 classDiagram
 
-    class Company {
-        +String name
+    class ExternalSystem {
     }
 
-    class Employee {
-        +String name
+    class RestController {
     }
 
-    class Engine {
-        +start()
+    class Service {
     }
 
-    class Car {
-        +drive()
-    }
-
-    class Vehicle {
+    class Repository {
         <<interface>>
-        +drive()
     }
 
-    Company o-- Employee : aggregation
-    Car *-- Engine : composition
-    Vehicle <|.. Car : implements
+    class DB1 {
+        <<database>>
+    }
+
+    class QueProducer {
+    }
+
+    class Kafka_ProcessQueue {
+        <<Kafka Queue>>
+    }
+
+    class Request {
+    }
+
+    class TransactionDTO {
+    }
+
+    class TransactionEntity {
+    }
+
+    ExternalSystem --> RestController : calls
+    RestController --> Service : calls
+    Service --> Repository : uses
+    Repository --> DB1 : accesses
+
+    Service --> QueProducer : publishes
+    QueProducer --> Kafka_ProcessQueue : publishes
+
+    ExternalSystem *-- Request : composition
+    RestController o-- Request : aggregation
+    RestController *-- TransactionDTO : composition
+
+    Service o-- TransactionDTO : aggregation
+    Service *-- TransactionEntity : composition
 ```
-
----
-
-
