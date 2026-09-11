@@ -1,51 +1,42 @@
-```mermaid
+```mermaid id="k8m2qp"
 classDiagram
 
-    class ExternalSystem {
-    }
-
-    class RestController {
-    }
-
-    class Service {
-    }
-
+    class ExternalSystem
+    class RestController
+    class Service
     class Repository {
         <<interface>>
     }
 
-    class DB1 {
-        <<database>>
+    class Database {
+        <<DB1>>
     }
 
-    class QueProducer {
+    class QueProducer
+    class Kafka {
+        <<ProcessQueue>>
     }
 
-    class Kafka_ProcessQueue {
-        <<Kafka Queue>>
-    }
+    class Request
+    class TransactionDTO
+    class TransactionEntity
+    class TransactionMessage
 
-    class Request {
-    }
+    ExternalSystem --> RestController
+    RestController --> Service
+    Service --> Repository
+    Repository --> Database
 
-    class TransactionDTO {
-    }
+    Service --> QueProducer
+    QueProducer --> Kafka
 
-    class TransactionEntity {
-    }
+    ExternalSystem --o Request : composition
+    RestController --o Request : aggregation
+    RestController --o TransactionDTO : composition
 
-    ExternalSystem --> RestController : calls
-    RestController --> Service : calls
-    Service --> Repository : uses
-    Repository --> DB1 : accesses
+    Service --o TransactionDTO : aggregation
+    Service --o TransactionEntity : composition
+    Service --o TransactionMessage : composition
 
-    Service --> QueProducer : publishes
-    QueProducer --> Kafka_ProcessQueue : publishes
-
-    ExternalSystem *-- Request : composition
-    RestController o-- Request : aggregation
-    RestController *-- TransactionDTO : composition
-
-    Service o-- TransactionDTO : aggregation
-    Service *-- TransactionEntity : composition
+    QueProducer --o TransactionMessage : aggregation
 ```
