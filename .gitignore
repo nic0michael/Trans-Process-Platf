@@ -11,6 +11,14 @@
 !gradle-wrapper.properties
 
 
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Gradle generated JARs
+*.jar
+
 # Git
 .git
 
