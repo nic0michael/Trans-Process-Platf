@@ -56,6 +56,11 @@ Nico proposed that we accept his design for the API project as provided in this 
 [https://github.com/nic0michael/Trans-Process-Platf/blob/master/backend/api/The_API_Design.md](https://github.com/nic0michael/Trans-Process-Platf/blob/master/backend/api/The_API_Design.md)
 
 ---
+
+## 2026-09-12 19:24
+Nico proposed we use Gradle version: gradle-8.14.3, as we experienced issues using Gradle 9 in IntelliJ
+
+---
 ## 2026-09-12 19:24
 Nico proposed we use Gradle version: gradle-8.14.3, as we experienced issues using Gradle 9 in IntelliJ
 
