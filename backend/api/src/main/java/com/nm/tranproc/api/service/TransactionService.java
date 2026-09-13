@@ -6,4 +6,8 @@ import com.nm.tranproc.api.exception.TransactionServiceException;
 
 public interface TransactionService {
   ResponseDTO sendToTransactionProcessor(Request request) throws TransactionServiceException;
+  public void writeToDb(Request request)
+      throws NumberFormatException,
+      IllegalArgumentException,
+      NullPointerException;
 }

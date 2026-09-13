@@ -10,13 +10,13 @@ public class TestRequestMaker {
     request.setTransactionIndex ( "1234");
     request.setTransactionGuid ( "yfF5fr7jjjfjj88");
     request.setRequestId ( "23ff");
-    request.setExternalSystemId ( "KKy34");
+    request.setExternalSystemId ( "1234");
     request.setTransactionType ( "SALES");
     request.setCurrency ( "USD");
     request.setAmount ( "124.78");
     request.setReference ( "Book45");
     request.setTransactionDescription ( "Book:73 Magazine July 2025");
-    request.setCompanyId ( "GH65");
+    request.setCompanyId ( "2345");
     request.setStatus ( "Busy");
 
     return request;

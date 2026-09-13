@@ -23,4 +23,12 @@ public class MockTransactionService implements TransactionService{
      }
      return response;
   }
+
+  @Override
+  public void writeToDb(Request request) throws NumberFormatException, IllegalArgumentException, NullPointerException {
+    switch(testType){
+      case THROWS_EXCEPTIONS -> throw new NumberFormatException();
+    }
+
+  }
 }

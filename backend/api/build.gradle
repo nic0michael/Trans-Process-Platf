@@ -3,13 +3,24 @@ plugins {
     id 'org.springframework.boot'
 }
 
+
 dependencies {
     implementation platform(
             org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
     )
 
+
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.apache.commons:commons-lang3:3.18.0'
 
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.postgresql:postgresql'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+
+
+
 }
