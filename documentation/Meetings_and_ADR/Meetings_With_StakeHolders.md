@@ -102,3 +102,7 @@ Nico proposed we use the VETO Design pattern: Validate, Enrich, Transform, Opera
 
 ---
 
+## 2026-09-13 19:59
+Nico proposed that we add Swagger to this project to facilitate Backend testing
+
+---
