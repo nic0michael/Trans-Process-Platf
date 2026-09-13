@@ -96,3 +96,9 @@ Nico proposed that we accept his design for the API project as provided in this 
 Nico proposed we use Gradle version: gradle-8.14.3, as we experienced issues using Gradle 9 in IntelliJ
 
 ---
+
+## 2026-09-13 14:19
+Nico proposed we use the VETO Design pattern: Validate, Enrich, Transform, Operation
+
+---
+
