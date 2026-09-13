@@ -61,7 +61,15 @@ Nico proposed that we accept his design for the API project as provided in this 
 Nico proposed we use Gradle version: gradle-8.14.3, as we experienced issues using Gradle 9 in IntelliJ
 
 ---
+
+
 ## 2026-09-12 19:24
 Nico proposed we use Gradle version: gradle-8.14.3, as we experienced issues using Gradle 9 in IntelliJ
+
+---
+
+
+## 2026-09-13 19:59
+Nico proposed that we add Swagger to this project to facilitate Backend testing
 
 ---
