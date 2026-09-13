@@ -3,7 +3,7 @@ package com.nm.tranproc.api.service;
 import com.nm.tranproc.api.controller.TestResponseMaker;
 import com.nm.tranproc.api.enums.TestType;
 import com.nm.tranproc.api.request.Request;
-import com.nm.tranproc.api.response.Response;
+import com.nm.tranproc.api.response.ResponseDTO;
 import com.nm.tranproc.api.exception.TransactionServiceException;
 
 public class MockTransactionService implements TransactionService{
@@ -14,8 +14,8 @@ public class MockTransactionService implements TransactionService{
 
 
   @Override
-  public Response sendToTransactionProcessor(Request request) throws TransactionServiceException{
-    Response response = null;
+  public ResponseDTO sendToTransactionProcessor(Request request) throws TransactionServiceException{
+    ResponseDTO response = null;
      switch(testType){
        case GOOD_TEST -> response =  TestResponseMaker.makeResponse(TestType.GOOD_TEST);
        case NEGATIVE_TEST -> response =  TestResponseMaker.makeResponse(TestType.NEGATIVE_TEST);

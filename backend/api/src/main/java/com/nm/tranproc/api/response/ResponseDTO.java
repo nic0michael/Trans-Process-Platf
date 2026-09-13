@@ -1,6 +1,6 @@
 package com.nm.tranproc.api.response;
 
-public class Response {
+public class ResponseDTO {
   private String responseCode;
   private String responseMessage;
   private String timestamp;
@@ -16,9 +16,9 @@ public class Response {
   private String companyId;
   private String status;
 
-  public Response(){}
+  public ResponseDTO(){}
 
-  public Response(String responseCode, String responseMessage, String timestamp, String transactionIndex, String transactionGuid, String requestId, String externalSystemId, String transactionType, String currency, String amount, String reference, String transactionDescription, String companyId, String status) {
+  public ResponseDTO(String responseCode, String responseMessage, String timestamp, String transactionIndex, String transactionGuid, String requestId, String externalSystemId, String transactionType, String currency, String amount, String reference, String transactionDescription, String companyId, String status) {
     this.responseCode = responseCode;
     this.responseMessage = responseMessage;
     this.timestamp = timestamp;

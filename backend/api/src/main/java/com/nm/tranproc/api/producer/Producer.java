@@ -2,8 +2,8 @@ package com.nm.tranproc.api.producer;
 
 import com.nm.tranproc.api.exception.TransactionServiceException;
 import com.nm.tranproc.api.request.Request;
-import com.nm.tranproc.api.response.Response;
+import com.nm.tranproc.api.response.ResponseDTO;
 
 public interface Producer {
-  Response sendTransaction(Request request) throws TransactionServiceException;
+  ResponseDTO sendTransaction(Request request) throws TransactionServiceException;
 }

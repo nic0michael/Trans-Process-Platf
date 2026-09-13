@@ -5,7 +5,7 @@ import com.nm.tranproc.api.exception.TransactionServiceException;
 import com.nm.tranproc.api.producer.MockProducer;
 import com.nm.tranproc.api.producer.Producer;
 import com.nm.tranproc.api.request.Request;
-import com.nm.tranproc.api.response.Response;
+import com.nm.tranproc.api.response.ResponseDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +20,7 @@ public class TransactionServiceTest {
      TransactionService service = new TransactionServiceImpl(producer);
 
     Request request = TestRequestMaker.makeRequest();
-    Response response = service.sendToTransactionProcessor(request);
+    ResponseDTO response = service.sendToTransactionProcessor(request);
     assertNotNull(response);
     String responseMessage = response.getResponseMessage();
     String responseCode = response.getResponseCode();
@@ -37,7 +37,7 @@ public class TransactionServiceTest {
     TransactionService service = new TransactionServiceImpl(producer);
 
     Request request = TestRequestMaker.makeRequest();
-    Response response = service.sendToTransactionProcessor(request);
+    ResponseDTO response = service.sendToTransactionProcessor(request);
     assertNotNull(response);
     String responseMessage = response.getResponseMessage();
     String responseCode = response.getResponseCode();

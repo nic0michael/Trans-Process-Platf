@@ -1,11 +1,11 @@
 package com.nm.tranproc.api.controller;
 import com.nm.tranproc.api.enums.TestType;
-import com.nm.tranproc.api.response.Response;
+import com.nm.tranproc.api.response.ResponseDTO;
 public class TestResponseMaker {
 
-  public static Response makeResponse(TestType testType) {
+  public static ResponseDTO makeResponse(TestType testType) {
 
-    Response response = new Response();
+    ResponseDTO response = new ResponseDTO();
     if(testType.equals(TestType.GOOD_TEST)) {
       response.setResponseCode("200");
       response.setResponseMessage("Success");

@@ -3,7 +3,7 @@ package com.nm.tranproc.api.controller;
 import com.nm.tranproc.api.enums.TestType;
 import com.nm.tranproc.api.exception.TransactionServiceException;
 import com.nm.tranproc.api.request.Request;
-import com.nm.tranproc.api.response.Response;
+import com.nm.tranproc.api.response.ResponseDTO;
 import com.nm.tranproc.api.service.MockTransactionService;
 import com.nm.tranproc.api.service.TransactionService;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,7 @@ class TransactionRestControllerTest {
         new TransactionRestController(service);
 
     Request request = TestRequestMaker.makeRequest();
-    Response response =
+    ResponseDTO response =
         restController.sendToTransactionProcessor(request);
     assertNotNull(response);
     String responseMessage = response.getResponseMessage();
@@ -41,7 +41,7 @@ class TransactionRestControllerTest {
         new TransactionRestController(service);
 
     Request request = TestRequestMaker.makeRequest();
-    Response response =
+    ResponseDTO response =
         restController.sendToTransactionProcessor(request);
     assertNotNull(response);
     String responseMessage = response.getResponseMessage();
