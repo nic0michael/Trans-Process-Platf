@@ -472,3 +472,16 @@ This version keeps the ADR material intentionally brief and lets the actual `arc
 [1]: https://github.com/nic0michael/Trans-Process-Platf "nic0michael/Trans-Process-Platf · GitHub"
 [2]: https://github.com/architecture-decision-record/architecture-decision-record?utm_source=chatgpt.com "GitHub - architecture-decision-record/architecture-decision-record: Architecture decision record (ADR) examples for software planning, IT leadership, and template documentation · GitHub"
 
+## Bibliography
+
+1. Richardson, C. **Transactional Outbox Pattern**. Microservices.io.
+   Reference: [Microservices.io – Transactional Outbox Pattern](https://microservices.io/patterns/data/transactional-outbox?utm_source=chatgpt.com)
+
+2. Richardson, C. **Microservices Patterns: With Examples in Java**. Manning Publications.
+   The book provides detailed coverage of the Transactional Outbox pattern and related microservices patterns.
+
+3. **VETO Design Pattern**.
+   VETO stands for **Validate, Enrich, Transform, Operate**. It is an integration pattern used to process and prepare messages before they are operated on by a target service. In this project, the VETO pattern is used without the routing stage.
+
+4. **VETRO Design Pattern**.
+   VETRO is a variation of the VETO pattern that adds a **Route** step: **Validate, Enrich, Transform, Route, Operate**. The pattern is documented by Oracle and Microsoft as a service mediation/integration pattern.
