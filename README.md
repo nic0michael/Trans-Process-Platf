@@ -54,7 +54,7 @@ The platform will demonstrate:
 * Docker
 * Kubernetes-ready deployment
 * observability
-* Mongo for NonSQL database
+* Mongo for NoSQL database
 * Gradle multi-project builds
 * A Swagger is added for Local testing of the backend
 
@@ -120,7 +120,7 @@ This allows the system to demonstrate how an application can remain responsive w
 
 # Transaction Processing
 
-A transaction moves through a defined lifecycle:
+**A transaction moves through a defined lifecycle:**
 ```mermaid
 flowchart TD
     RECEIVED --> VALIDATED
@@ -206,21 +206,14 @@ Testing is treated as part of the architecture rather than something added after
 
 The project will use several levels of testing:
 
-```text
-Unit Tests
-     |
-     v
-Integration Tests
-     |
-     v
-Contract Tests
-     |
-     v
-Fault Injection
-     |
-     v
-Performance Tests
+```mermaid
+flowchart TD
+    UnitTests["Unit Tests"] --> IntegrationTests["Integration Tests"]
+    IntegrationTests --> ContractTests["Contract Tests"]
+    ContractTests --> FaultInjection["Fault Injection"]
+    FaultInjection --> PerformanceTests["Performance Tests"]
 ```
+
 
 The objective is to test both individual components and the behaviour of the complete distributed workflow.
 
@@ -265,35 +258,20 @@ Correlation IDs will allow a transaction to be followed across the API, Kafka, p
 
 # Architecture and Design Process
 
-The project follows a deliberate architecture-first process:
-
-```text
-Requirements
-     |
-     v
-Architecture
-     |
-     v
-Architecture Decisions
-     |
-     v
-Detailed Design
-     |
-     v
-TDD
-     |
-     v
-Implementation
-     |
-     v
-Integration Testing
-     |
-     v
-Performance Testing
-     |
-     v
-Deployment
+**The project follows a deliberate architecture-first process:**
+```mermaid id="k4m7p2"
+flowchart TD
+    Requirements --> Architecture
+    Architecture --> ArchitectureDecisions["Architecture Decisions"]
+    ArchitectureDecisions --> ADR["Architectural Decisions Register"]
+    ADR --> DetailedDesign["Detailed Design"]
+    DetailedDesign --> TDD
+    TDD --> Implementation
+    Implementation --> IntegrationTesting["Integration Testing"]
+    IntegrationTesting --> PerformanceTesting["Performance Testing"]
+    PerformanceTesting --> Deployment
 ```
+
 
 Architecture meetings are used to discuss significant design questions before implementation.
 
