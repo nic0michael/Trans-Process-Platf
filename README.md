@@ -54,6 +54,7 @@ The platform will demonstrate:
 * observability
 * Mongo for NonSQL database
 * Gradle multi-project builds
+* A Swagger is added for Local testing of the backend
 
 ---
 
