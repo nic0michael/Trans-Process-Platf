@@ -14,13 +14,15 @@ The emphasis is not simply on writing application code. The project starts with 
 
 The platform is designed to run on a laptop using Docker and Docker Compose, while maintaining an architecture that can later be deployed to Kubernetes.
 
+**This Project is built using Architecture Best Practices:**
+- Every **Design or Architectural Decision** is made in an architecture meeting and appears in the minutes.
+- These Architectural Decisions are then **recorded in our Architectural Decisions Register**
+- We decided to use Maiden UML Diagrams as GitHub and the Chrome Browser support Maiden diagrams.
+- We follow **IBM GS Method for our methodology**, as its scope covers the whole life-cycle of the project providing a complete set of Artifacts.
+
 **In this project, we used two Design Patterns:**
 - The **OutBox pattern** using an Asynchronous service to connect to an external slow service and guarantee there are no duplicate transactions
-- The **VETO patern** using these functions
-1. Validator to validate the Request
-2. Enricher to enrich the request with a unique TransactionGUID
-3. Transformer to transform the Request to a DTO
-4. Operation runs in the external system
+- The **VETO patern** a popular Service Design patterb
 
 ---
 
