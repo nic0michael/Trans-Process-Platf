@@ -103,59 +103,7 @@ flowchart TD
     Prometheus --> Grafana
 ```
 
-One important observation: **Risk Evaluation Service** and **Prometheus/Grafana** are currently shown as standalone components in your original diagram—they don't have connections to the main transaction flow. I have preserved that rather than inventing relationships.
 
-
-```text
-                         +----------------+
-                         |    Angular     |
-                         |    Frontend    |
-                         +-------+--------+
-                                 |
-                                 | REST
-                                 v
-                         +---------------+
-                         |   API Service |
-                         +-------+-------+
-                                 |
-                    +------------+------------+
-                    |                         |
-                    v                         v
-             +-------------+          +---------------+
-             | PostgreSQL  |          | Outbox Events |
-             +-------------+          +-------+-------+
-                                             |
-                                             v
-                                      +-------------+
-                                      |    Kafka    |
-                                      +------+------+
-                                             |
-                              +--------------+--------------+
-                              |              |              |
-                              v              v              v
-                         Processor 1    Processor 2    Processor N
-                              |              |              |
-                              +--------------+--------------+
-                                             |
-                                             v
-                                      +-------------+
-                                      | PostgreSQL  |
-                                      +-------------+
-
-                         +----------------------+
-                         | Risk Evaluation      |
-                         | Service              |
-                         +----------------------+
-
-                         +-------------+
-                         | Prometheus  |
-                         +------+------+
-                                |
-                                v
-                         +-------------+
-                         |  Grafana    |
-                         +-------------+
-```
 
 The design separates:
 
@@ -173,6 +121,21 @@ This allows the system to demonstrate how an application can remain responsive w
 # Transaction Processing
 
 A transaction moves through a defined lifecycle:
+```mermaid
+flowchart TD
+    RECEIVED --> VALIDATED
+    VALIDATED --> QUEUED
+    QUEUED --> PROCESSING
+
+    PROCESSING --> COMPLETED
+    PROCESSING --> FAILED
+
+    FAILED --> RETRY
+
+    RETRY --> PROCESSING
+    RETRY --> DEAD_LETTER
+```
+
 
 ```text
 RECEIVED
