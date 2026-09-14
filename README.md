@@ -451,36 +451,19 @@ This project demonstrates more than a working application.
 
 It demonstrates the complete engineering process:
 
-```text
-Understand the Problem
-        |
-        v
-Analyse Requirements
-        |
-        v
-Evaluate Alternatives
-        |
-        v
-Make Architecture Decisions
-        |
-        v
-Record Decisions
-        |
-        v
-Design the Solution
-        |
-        v
-Build Using TDD
-        |
-        v
-Test
-        |
-        v
-Measure
-        |
-        v
-Deploy
+```mermaid id="r6t2k9"
+flowchart TD
+    UnderstandProblem["Understand the Problem"] --> AnalyseRequirements["Analyse Requirements"]
+    AnalyseRequirements --> EvaluateAlternatives["Evaluate Alternatives"]
+    EvaluateAlternatives --> ArchitectureDecisions["Make Architecture Decisions"]
+    ArchitectureDecisions --> RecordDecisions["Record Decisions"]
+    RecordDecisions --> DesignSolution["Design the Solution"]
+    DesignSolution --> BuildTDD["Build Using TDD"]
+    BuildTDD --> Test
+    Test --> Measure
+    Measure --> Deploy
 ```
+
 
 The objective is to produce a system where the **architecture and the reasoning behind the architecture are as important as the code itself**.
 
