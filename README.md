@@ -52,6 +52,7 @@ The platform will demonstrate:
 * Docker
 * Kubernetes-ready deployment
 * observability
+* Mongo for NonSQL database
 * Gradle multi-project builds
 
 ---
