@@ -22,7 +22,7 @@ The platform is designed to run on a laptop using Docker and Docker Compose, whi
 
 **In this project, we used two Design Patterns:**
 - The **OutBox pattern** using an Asynchronous service to connect to an external slow service and guarantee there are no duplicate transactions
-- The **VETO patern** a popular Service Design patterb
+- The **VETO patern** a popular Service Design pattern
 
 ---
 
