@@ -63,6 +63,48 @@ The platform will demonstrate:
 # Architecture
 
 The high-level architecture separates the user-facing API from the asynchronous transaction-processing workload.
+Certainly. Here is the equivalent Mermaid diagram, keeping the structure of your original diagram:
+
+```mermaid
+flowchart TD
+
+    Angular["Angular<br/>Frontend"]
+    API["API Service"]
+    PostgreSQL1["PostgreSQL"]
+    Outbox["Outbox Events"]
+    Kafka["Kafka"]
+
+    Processor1["Processor 1"]
+    Processor2["Processor 2"]
+    ProcessorN["Processor N"]
+
+    PostgreSQL2["PostgreSQL"]
+
+    Risk["Risk Evaluation<br/>Service"]
+
+    Prometheus["Prometheus"]
+    Grafana["Grafana"]
+
+    Angular -->|REST| API
+
+    API --> PostgreSQL1
+    API --> Outbox
+
+    Outbox --> Kafka
+
+    Kafka --> Processor1
+    Kafka --> Processor2
+    Kafka --> ProcessorN
+
+    Processor1 --> PostgreSQL2
+    Processor2 --> PostgreSQL2
+    ProcessorN --> PostgreSQL2
+
+    Prometheus --> Grafana
+```
+
+One important observation: **Risk Evaluation Service** and **Prometheus/Grafana** are currently shown as standalone components in your original diagram—they don't have connections to the main transaction flow. I have preserved that rather than inventing relationships.
+
 
 ```text
                          +----------------+
