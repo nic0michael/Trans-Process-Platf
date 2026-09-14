@@ -39,20 +39,33 @@ public class TransactionServiceImpl implements TransactionService{
     writeToDb(request);
     return producer.sendTransaction(request);
   }
+
+  /**
+   * IF RECORD WITH SAME ExternalSystemId EXISTS IN DB USE THAT RECORD
+   * IF NOT EXISTS AND RECORD WITH SAME TransactionGuid EXISTS IN DB USE THAT RECORD
+   * OTHERWISE CREATE A NEW RECORD
+   *
+   * @param request
+   * @throws NumberFormatException
+   * @throws IllegalArgumentException
+   * @throws NullPointerException
+   */
   @Override
   public void writeToDb(Request request)
-
       throws NumberFormatException,
       IllegalArgumentException,
       NullPointerException {
 
     TransactionEntity transactionEntity = null;
     TransactionDto dto = Transformer.convertToTransactionDto(request);
-    List<TransactionEntity> entities = repository.findAllByTransactionGuid(dto.getTransactionGuid());
-    if(null==entities || entities.isEmpty()){
+    List<TransactionEntity> externalSystemIdEntities = repository.findAllByExternalSystemId(dto.getExternalSystemId());
+    List<TransactionEntity> guidEntities = repository.findAllByTransactionGuid(dto.getTransactionGuid());
+    if(null==externalSystemIdEntities || externalSystemIdEntities.isEmpty() && null==guidEntities || guidEntities.isEmpty()){
       transactionEntity = new TransactionEntity();
-    } else{
-      transactionEntity = entities.get(0);
+    } else if(!externalSystemIdEntities.isEmpty()){
+      transactionEntity = externalSystemIdEntities.get(0);
+    } else if(!guidEntities.isEmpty()){
+      transactionEntity = guidEntities.get(0);
     }
 
     transactionEntity.setTransactionDescription(dto.getTransactionDescription());

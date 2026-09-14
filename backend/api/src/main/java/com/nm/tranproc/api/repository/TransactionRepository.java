@@ -8,5 +8,6 @@ public interface TransactionRepository   extends
     JpaRepository<TransactionEntity, Long> {
 
   List<TransactionEntity> findAllByTransactionGuid(String transactionGuid);
+  List<TransactionEntity> findAllByExternalSystemId(String externalSystemId);
 
 }

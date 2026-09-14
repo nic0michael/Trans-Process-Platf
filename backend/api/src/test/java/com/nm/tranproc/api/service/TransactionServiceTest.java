@@ -4,7 +4,6 @@ import com.nm.tranproc.api.enums.TestType;
 import com.nm.tranproc.api.exception.TransactionServiceException;
 import com.nm.tranproc.api.producer.MockProducer;
 import com.nm.tranproc.api.producer.Producer;
-import com.nm.tranproc.api.repository.MockTransactionRepository;
 import com.nm.tranproc.api.repository.TransactionRepository;
 import com.nm.tranproc.api.request.Request;
 import com.nm.tranproc.api.response.ResponseDTO;
