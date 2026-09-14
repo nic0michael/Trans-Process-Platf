@@ -137,32 +137,6 @@ flowchart TD
 ```
 
 
-```text
-RECEIVED
-   |
-   v
-VALIDATED
-   |
-   v
-QUEUED
-   |
-   v
-PROCESSING
-   |
-   +----------+
-   |          |
-   v          v
-COMPLETED   FAILED
-              |
-              v
-            RETRY
-              |
-         +----+----+
-         |         |
-         v         v
-    PROCESSING   DEAD_LETTER
-```
-
 The system is designed to prevent duplicate processing through an idempotency mechanism based on a unique request identifier.
 
 ---
