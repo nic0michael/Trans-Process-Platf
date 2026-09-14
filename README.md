@@ -14,6 +14,14 @@ The emphasis is not simply on writing application code. The project starts with 
 
 The platform is designed to run on a laptop using Docker and Docker Compose, while maintaining an architecture that can later be deployed to Kubernetes.
 
+**In this project, we used two Design Patterns:**
+- The **OutBox pattern** using an Asynchronous service to connect to an external slow service and guarantee there are no duplicate transactions
+- The **VETO patern** using these functions
+1. Validator to validate the Request
+2. Enricher to enrich the request with a unique TransactionGUID
+3. Transformer to transform the Request to a DTO
+4. Operation runs in the external system
+
 ---
 
 # Project Goals
