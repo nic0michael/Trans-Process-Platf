@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -37,15 +39,19 @@ public class TransactionRestControllerMokitoTest {
     when(service.sendToTransactionProcessor(request))
         .thenReturn(expectedResponse);
 
-    ResponseDTO response =
+    ResponseEntity<ResponseDTO> response =
         controller.sendToTransactionProcessor(request);
 
     assertNotNull(response);
-    assertEquals("200", response.getResponseCode());
-    assertEquals("Success", response.getResponseMessage());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals("200", response.getBody().getResponseCode());
+    assertEquals("Success", response.getBody().getResponseMessage());
 
     verify(service).sendToTransactionProcessor(request);
   }
+
+
 
 
   @Test
@@ -58,10 +64,14 @@ public class TransactionRestControllerMokitoTest {
     when(service.sendToTransactionProcessor(request))
         .thenThrow(new TransactionServiceException("Service error"));
 
-    assertThrows(
-        TransactionServiceException.class,
-        () -> controller.sendToTransactionProcessor(request)
-    );
+    ResponseEntity<ResponseDTO> response =
+        controller.sendToTransactionProcessor(request);
+
+    assertNotNull(response);
+    assertEquals(500, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals("500", response.getBody().getResponseCode());
+    assertEquals("Service error", response.getBody().getResponseMessage());
 
     verify(service).sendToTransactionProcessor(request);
   }

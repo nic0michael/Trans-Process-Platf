@@ -31,4 +31,10 @@ public class MockTransactionService implements TransactionService{
     }
 
   }
+
+  @Override
+  public ResponseDTO getTransactionResults(String transactionGuid) {
+    ResponseDTO response = TestResponseMaker.makeResponse(testType);
+    return response;
+  }
 }

@@ -10,4 +10,6 @@ public interface TransactionService {
       throws NumberFormatException,
       IllegalArgumentException,
       NullPointerException;
+
+  ResponseDTO getTransactionResults(String transactionGuid);
 }

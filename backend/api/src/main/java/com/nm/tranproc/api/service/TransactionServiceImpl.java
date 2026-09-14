@@ -85,4 +85,9 @@ public class TransactionServiceImpl implements TransactionService{
 
 
   }
+
+  @Override
+  public ResponseDTO getTransactionResults(String transactionGuid) {
+    return null;
+  }
 }
