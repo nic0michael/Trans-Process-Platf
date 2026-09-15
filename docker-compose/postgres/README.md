@@ -1,5 +1,14 @@
 # PostgreSQL Development Environment
 
+## Deployment instructions
+```bash
+# run these commands:
+docker compose pull
+
+docker compose up -d
+
+```
+
 ## PostgreSQL Configuration
 
 * PostgreSQL 17

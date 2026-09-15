@@ -1,6 +1,15 @@
 ````markdown
 # Kafka Development Environment
 
+## Deployment instructions
+```bash
+# run these commands:
+docker compose pull
+
+docker compose up -d
+
+```
+
 ## Kafka Configuration
 
 - Apache Kafka 4.3.1
