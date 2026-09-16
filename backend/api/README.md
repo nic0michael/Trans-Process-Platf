@@ -15,3 +15,9 @@ please look inside the docker-compose/ folder
 for instructions to run 3 docker containers
 from the Stacks folder
 
+
+## Open Dockage your browser and use admin user with the strong password
+**[http://127.0.0.0:5001/](http://127.0.0.0:5001/)
+
+
+
