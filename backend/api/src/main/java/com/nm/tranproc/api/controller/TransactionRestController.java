@@ -19,6 +19,8 @@ public class TransactionRestController {
   public TransactionRestController(TransactionService service) {
     this.service = service;
   }
+
+  @PostMapping
   public ResponseEntity<ResponseDTO> sendToTransactionProcessor(
       @RequestBody Request request) {
 

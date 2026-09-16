@@ -23,7 +23,7 @@ public class KafkaConfig {
 
     properties.put(
         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-        "10.154.2.87:9092"
+        "localhost:9092"
     );
 
     properties.put(

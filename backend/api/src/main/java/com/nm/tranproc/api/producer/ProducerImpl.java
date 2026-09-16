@@ -25,6 +25,18 @@ public class ProducerImpl implements Producer {
       ResponseDTO response = new ResponseDTO();
       response.setResponseCode("200");
       response.setResponseMessage("Transaction sent to Kafka");
+      response.setTimestamp(request.getTimestamp());
+      response.setTransactionIndex(request.getTransactionIndex());
+      response.setTransactionGuid(request.getTransactionGuid());
+      response.setRequestId(request.getRequestId());
+      response.setExternalSystemId(request.getExternalSystemId());
+      response.setTransactionType(request.getTransactionType());
+      response.setCurrency(request.getCurrency());
+      response.setAmount(request.getAmount());
+      response.setReference(request.getReference());
+      response.setTransactionDescription(request.getTransactionDescription());
+      response.setCompanyId(request.getCompanyId());
+      response.setStatus(request.getStatus());
 
       return response;
 

@@ -88,6 +88,15 @@ public class TransactionServiceImpl implements TransactionService{
 
   @Override
   public ResponseDTO getTransactionResults(String transactionGuid) {
-    return null;
+    ResponseDTO responseDTO = new ResponseDTO();
+    List<TransactionEntity> guidEntities = repository.findAllByTransactionGuid(transactionGuid);
+    if (null != guidEntities && ! guidEntities.isEmpty()){
+      TransactionEntity transactionEntity = guidEntities.get(0);
+      responseDTO = Transformer.convertToResponseDTO(transactionEntity);
+    } else{
+      responseDTO.setResponseCode("200");
+      responseDTO.setResponseMessage("Did not find Guid: "+ transactionGuid);
+    }
+    return responseDTO;
   }
 }
