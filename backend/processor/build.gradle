@@ -14,10 +14,19 @@ dependencies {
 
     implementation 'org.springframework.kafka:spring-kafka'
 
-    runtimeOnly 'org.postgresql:postgresql'
-
+    implementation project(':backend:api')
     implementation project(':backend:common')
+
+    runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
+}
+
+sourceSets {
+    test {
+        java {
+            srcDirs = ['src/test']
+        }
+    }
 }
