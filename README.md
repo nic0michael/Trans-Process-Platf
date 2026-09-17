@@ -36,6 +36,7 @@ The project has two main goals:
 The platform will demonstrate:
 
 * Java 21
+* Mongo 8.0
 * Spring Boot
 * Angular
 * REST APIs
