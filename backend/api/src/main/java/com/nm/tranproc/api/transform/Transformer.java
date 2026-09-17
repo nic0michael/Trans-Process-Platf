@@ -34,6 +34,27 @@ public class Transformer {
     return dto;
   }
 
+  public static ResponseDTO convertRequestToResponseDTO(Request request) {
+    ResponseDTO dto = new ResponseDTO();
+    String timestamp = LocalDateTime.now()
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+    dto.setTimestamp(timestamp);
+    dto.setTransactionIndex(request.getTransactionIndex());
+    dto.setTransactionGuid(request.getTransactionGuid());
+    dto.setRequestId(request.getRequestId());
+    dto.setExternalSystemId(request.getExternalSystemId());
+    dto.setTransactionType(request.getTransactionType());
+    dto.setCurrency(request.getCurrency());
+    dto.setAmount(request.getAmount());
+    dto.setReference(request.getReference());
+    dto.setTransactionDescription(request.getTransactionDescription());
+    dto.setCompanyId(request.getCompanyId());
+    dto.setStatus(request.getStatus());
+
+    return dto;
+  }
+
   public static ResponseDTO convertToResponseDTO(
       TransactionEntity transactionEntity) {
 
@@ -98,4 +119,5 @@ public class Transformer {
 
     return response;
   }
+
 }

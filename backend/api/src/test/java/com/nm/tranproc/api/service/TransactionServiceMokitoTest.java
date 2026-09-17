@@ -1,5 +1,6 @@
 package com.nm.tranproc.api.service;
 
+import com.nm.tranproc.api.audit.MongoAuditService;
 import com.nm.tranproc.api.controller.TestRequestMaker;
 import com.nm.tranproc.api.entity.TransactionEntity;
 import com.nm.tranproc.api.producer.Producer;
@@ -28,36 +29,40 @@ public class TransactionServiceMokitoTest {
   @Mock
   private TransactionRepository repository;
 
+  @Mock
+  private MongoAuditService mongoAuditService;
+
   @InjectMocks
   private TransactionServiceImpl service;
 
 
-  @Test
-  @DisplayName("Positive_Test_1 - Valid request")
-  void sendToTransactionProcessorValidTest() throws Exception {
+@Test
+@DisplayName("Positive_Test_1 - Valid request")
+void sendToTransactionProcessorValidTest() throws Exception {
 
-    Request request = TestRequestMaker.makeRequest();
+  Request request = TestRequestMaker.makeRequest();
 
-    ResponseDTO expectedResponse = new ResponseDTO();
-    expectedResponse.setResponseCode("200");
-    expectedResponse.setResponseMessage("Success");
+  ResponseDTO expectedResponse = new ResponseDTO();
+  expectedResponse.setResponseCode("200");
+  expectedResponse.setResponseMessage("Success");
 
-    when(repository.findAllByTransactionGuid(anyString()))
-        .thenReturn(Collections.emptyList());
+  when(repository.findAllByTransactionGuid(anyString()))
+      .thenReturn(Collections.emptyList());
 
-    when(producer.sendTransaction(any(Request.class)))
-        .thenReturn(expectedResponse);
+  when(producer.sendTransaction(any(Request.class)))
+      .thenReturn(expectedResponse);
 
-    ResponseDTO response =
-        service.sendToTransactionProcessor(request);
+  ResponseDTO response =
+      service.sendToTransactionProcessor(request);
 
-    assertNotNull(response);
-    assertEquals("200", response.getResponseCode());
-    assertEquals("Success", response.getResponseMessage());
+  assertNotNull(response);
+  assertEquals("200", response.getResponseCode());
+  assertEquals("Success", response.getResponseMessage());
 
-    verify(repository).save(any(TransactionEntity.class));
-    verify(producer).sendTransaction(any(Request.class));
-  }
+  verify(repository).save(any(TransactionEntity.class));
+  verify(producer).sendTransaction(any(Request.class));
+  verify(mongoAuditService).writeToAudit(expectedResponse);
+}
 
 
   @Test
@@ -75,6 +80,7 @@ public class TransactionServiceMokitoTest {
 
     verifyNoInteractions(repository);
     verifyNoInteractions(producer);
+    verifyNoInteractions(mongoAuditService);
   }
 
 

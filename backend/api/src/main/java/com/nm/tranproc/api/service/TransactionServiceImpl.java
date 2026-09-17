@@ -1,5 +1,6 @@
 package com.nm.tranproc.api.service;
 
+import com.nm.tranproc.api.audit.MongoAuditService;
 import com.nm.tranproc.api.dto.TransactionDto;
 import com.nm.tranproc.api.enrich.Enricher;
 import com.nm.tranproc.api.entity.TransactionEntity;
@@ -19,26 +20,33 @@ import java.util.List;
 public class TransactionServiceImpl implements TransactionService{
   private final Producer producer;
   private final TransactionRepository repository;
+  private final MongoAuditService mongoAuditService;
 
   @Autowired
-  public TransactionServiceImpl(Producer producer, TransactionRepository repository) {
+  public TransactionServiceImpl(Producer producer, TransactionRepository repository,  MongoAuditService mongoAuditService) {
     this.producer = producer;
     this.repository = repository;
+    this.mongoAuditService = mongoAuditService;
   }
 
   @Override
   public ResponseDTO sendToTransactionProcessor(Request request)   throws TransactionServiceException{
     Validator validator = new Validator();
     if(! validator.validate(request)){
-      ResponseDTO response = new ResponseDTO();
+      ResponseDTO response = Transformer.convertRequestToResponseDTO(request);
       response.setResponseMessage(validator.getMessage());
       response.setResponseCode("400");
+      writeToAudit(response);
+
       return response;
     }
     request = Enricher.enrich(request);
+    ResponseDTO response = Transformer.convertRequestToResponseDTO(request);
+    writeToAudit(response);
     writeToDb(request);
     return producer.sendTransaction(request);
   }
+
 
   /**
    * IF RECORD WITH SAME ExternalSystemId EXISTS IN DB USE THAT RECORD
@@ -98,5 +106,10 @@ public class TransactionServiceImpl implements TransactionService{
       responseDTO.setResponseMessage("Did not find Guid: "+ transactionGuid);
     }
     return responseDTO;
+  }
+
+
+  private void writeToAudit(ResponseDTO responseDTO) {
+    mongoAuditService.writeToAudit(responseDTO);
   }
 }

@@ -122,7 +122,8 @@ from the Stacks folder
 
 
 ## Open Dockage your browser and use admin user with the strong password
-**[http://127.0.0.0:5001/](http://127.0.0.0:5001/)
+**[http://127.0.0.0:5001/](http://127.0.0.0:5001/) \
+http://127.0.0.0:5001/
 
 
 

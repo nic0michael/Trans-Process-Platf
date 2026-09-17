@@ -1,4 +1,5 @@
 package com.nm.tranproc.api.service;
+import com.nm.tranproc.api.audit.MongoAuditService;
 import com.nm.tranproc.api.controller.TestRequestMaker;
 import com.nm.tranproc.api.enums.TestType;
 import com.nm.tranproc.api.exception.TransactionServiceException;
@@ -21,7 +22,9 @@ public class TransactionServiceTest {
   @DisplayName("Positive_Test_1 - Response code 200")
   void sendToTransactionProcessorPositiveTest() throws TransactionServiceException {
     Producer producer = new MockProducer(TestType.GOOD_TEST);
-     TransactionService service = new TransactionServiceImpl(producer,repository);
+    MongoAuditService mongoAuditService =
+        mock(MongoAuditService.class);
+     TransactionService service = new TransactionServiceImpl(producer,repository,mongoAuditService);
 
     Request request = TestRequestMaker.makeRequest();
     ResponseDTO response = service.sendToTransactionProcessor(request);
@@ -38,7 +41,9 @@ public class TransactionServiceTest {
   @DisplayName("Negative_Test_2 - Response code 500")
   void sendToTransactionProcessorNegativeTest() throws TransactionServiceException {
     Producer producer = new MockProducer(TestType.NEGATIVE_TEST);
-    TransactionService service = new TransactionServiceImpl(producer,repository);
+    MongoAuditService mongoAuditService =
+        mock(MongoAuditService.class);
+    TransactionService service = new TransactionServiceImpl(producer,repository,mongoAuditService);
 
     Request request = TestRequestMaker.makeRequest();
     ResponseDTO response = service.sendToTransactionProcessor(request);
@@ -55,7 +60,9 @@ public class TransactionServiceTest {
   @DisplayName("Negative_Test_3 - TransactionServiceException")
   void sendToTransactionProcessorExceptionTest() {
     Producer producer = new MockProducer(TestType.THROWS_EXCEPTIONS);
-    TransactionService service = new TransactionServiceImpl(producer,repository);
+    MongoAuditService mongoAuditService =
+        mock(MongoAuditService.class);
+    TransactionService service = new TransactionServiceImpl(producer,repository,mongoAuditService);
 
     Request request = TestRequestMaker.makeRequest();
     assertThrows(
