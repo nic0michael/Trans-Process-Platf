@@ -52,8 +52,6 @@ public class TransactionRestControllerMokitoTest {
   }
 
 
-
-
   @Test
   @DisplayName("Negative_Test_2 - Service throws exception")
   void sendToTransactionProcessorExceptionTest()

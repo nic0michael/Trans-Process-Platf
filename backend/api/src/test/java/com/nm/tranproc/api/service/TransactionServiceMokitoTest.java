@@ -10,6 +10,7 @@ import com.nm.tranproc.api.repository.TransactionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,35 +36,62 @@ public class TransactionServiceMokitoTest {
   @InjectMocks
   private TransactionServiceImpl service;
 
+  @Test
+  @DisplayName("Positive_Test_1 - Valid request")
+  void sendToTransactionProcessorValidTest() throws Exception {
 
-@Test
-@DisplayName("Positive_Test_1 - Valid request")
-void sendToTransactionProcessorValidTest() throws Exception {
+    Request request = TestRequestMaker.makeRequest();
 
-  Request request = TestRequestMaker.makeRequest();
+    ResponseDTO expectedResponse = new ResponseDTO();
+    expectedResponse.setResponseCode("200");
+    expectedResponse.setResponseMessage("Success");
 
-  ResponseDTO expectedResponse = new ResponseDTO();
-  expectedResponse.setResponseCode("200");
-  expectedResponse.setResponseMessage("Success");
+    when(repository.findAllByTransactionGuid(anyString()))
+        .thenReturn(Collections.emptyList());
 
-  when(repository.findAllByTransactionGuid(anyString()))
-      .thenReturn(Collections.emptyList());
+    when(producer.sendTransaction(any(Request.class)))
+        .thenReturn(expectedResponse);
 
-  when(producer.sendTransaction(any(Request.class)))
-      .thenReturn(expectedResponse);
+    ResponseDTO response =
+        service.sendToTransactionProcessor(request);
 
-  ResponseDTO response =
-      service.sendToTransactionProcessor(request);
+    assertNotNull(response);
+    assertEquals("200", response.getResponseCode());
+    assertEquals("Success", response.getResponseMessage());
 
-  assertNotNull(response);
-  assertEquals("200", response.getResponseCode());
-  assertEquals("Success", response.getResponseMessage());
+    verify(repository).save(any(TransactionEntity.class));
+    verify(producer).sendTransaction(any(Request.class));
 
-  verify(repository).save(any(TransactionEntity.class));
-  verify(producer).sendTransaction(any(Request.class));
-  verify(mongoAuditService).writeToAudit(expectedResponse);
-}
+    ArgumentCaptor<ResponseDTO> auditCaptor =
+        ArgumentCaptor.forClass(ResponseDTO.class);
 
+    verify(mongoAuditService).writeToAudit(auditCaptor.capture());
+
+    ResponseDTO auditResponse = auditCaptor.getValue();
+
+    assertNotNull(auditResponse);
+    assertNotNull(auditResponse.getTimestamp());
+    assertEquals(request.getTransactionGuid(),
+        auditResponse.getTransactionGuid());
+    assertEquals(request.getRequestId(),
+        auditResponse.getRequestId());
+    assertEquals(request.getExternalSystemId(),
+        auditResponse.getExternalSystemId());
+    assertEquals(request.getTransactionType(),
+        auditResponse.getTransactionType());
+    assertEquals(request.getCurrency(),
+        auditResponse.getCurrency());
+    assertEquals(request.getAmount(),
+        auditResponse.getAmount());
+    assertEquals(request.getReference(),
+        auditResponse.getReference());
+    assertEquals(request.getTransactionDescription(),
+        auditResponse.getTransactionDescription());
+    assertEquals(request.getCompanyId(),
+        auditResponse.getCompanyId());
+    assertEquals(request.getStatus(),
+        auditResponse.getStatus());
+  }
 
   @Test
   @DisplayName("Negative_Test_2 - Invalid request")
@@ -80,9 +108,9 @@ void sendToTransactionProcessorValidTest() throws Exception {
 
     verifyNoInteractions(repository);
     verifyNoInteractions(producer);
-    verifyNoInteractions(mongoAuditService);
-  }
 
+    verify(mongoAuditService).writeToAudit(any(ResponseDTO.class));
+  }
 
   @Test
   @DisplayName("Positive_Test_3 - New transaction")
@@ -99,7 +127,6 @@ void sendToTransactionProcessorValidTest() throws Exception {
 
     verify(repository).save(any(TransactionEntity.class));
   }
-
 
   @Test
   @DisplayName("Positive_Test_4 - Existing transaction")
@@ -118,7 +145,6 @@ void sendToTransactionProcessorValidTest() throws Exception {
 
     verify(repository).save(existingEntity);
   }
-
 
   @Test
   @DisplayName("Positive_Test_5 - Null repository result")

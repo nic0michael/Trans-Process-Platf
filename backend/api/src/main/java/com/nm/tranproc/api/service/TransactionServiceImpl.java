@@ -10,6 +10,8 @@ import com.nm.tranproc.api.request.Request;
 import com.nm.tranproc.api.response.ResponseDTO;
 import com.nm.tranproc.api.transform.Transformer;
 import com.nm.tranproc.api.validate.Validator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.nm.tranproc.api.exception.TransactionServiceException;
@@ -22,6 +24,8 @@ public class TransactionServiceImpl implements TransactionService{
   private final TransactionRepository repository;
   private final MongoAuditService mongoAuditService;
 
+  private static final Logger logger = LogManager.getLogger(TransactionServiceImpl.class);
+
   @Autowired
   public TransactionServiceImpl(Producer producer, TransactionRepository repository,  MongoAuditService mongoAuditService) {
     this.producer = producer;
@@ -33,16 +37,20 @@ public class TransactionServiceImpl implements TransactionService{
   public ResponseDTO sendToTransactionProcessor(Request request)   throws TransactionServiceException{
     Validator validator = new Validator();
     if(! validator.validate(request)){
+      logger.info("Validation Failed" + validator.getMessage());
       ResponseDTO response = Transformer.convertRequestToResponseDTO(request);
       response.setResponseMessage(validator.getMessage());
       response.setResponseCode("400");
+      logger.info("Writing failed response to Audit");
       writeToAudit(response);
 
       return response;
     }
+    logger.info("Validation succeeded");
     request = Enricher.enrich(request);
     ResponseDTO response = Transformer.convertRequestToResponseDTO(request);
     writeToAudit(response);
+    logger.info("Writing request to DB");
     writeToDb(request);
     return producer.sendTransaction(request);
   }
@@ -70,10 +78,13 @@ public class TransactionServiceImpl implements TransactionService{
     List<TransactionEntity> guidEntities = repository.findAllByTransactionGuid(dto.getTransactionGuid());
     if(null==externalSystemIdEntities || externalSystemIdEntities.isEmpty() && null==guidEntities || guidEntities.isEmpty()){
       transactionEntity = new TransactionEntity();
+      logger.info("Entity not found creating it");
     } else if(!externalSystemIdEntities.isEmpty()){
       transactionEntity = externalSystemIdEntities.get(0);
+      logger.info("Entity found updating it");
     } else if(!guidEntities.isEmpty()){
       transactionEntity = guidEntities.get(0);
+      logger.info("Entity found updating it");
     }
 
     transactionEntity.setTransactionDescription(dto.getTransactionDescription());
@@ -88,9 +99,8 @@ public class TransactionServiceImpl implements TransactionService{
     transactionEntity.setTransactionDescription(dto.getTransactionDescription());
     transactionEntity.setCompanyId(dto.getCompanyId());
     transactionEntity.setStatus(dto.getStatus());
-
+    logger.info("Saving Entity");
     repository.save(transactionEntity);
-
 
   }
 
@@ -101,15 +111,18 @@ public class TransactionServiceImpl implements TransactionService{
     if (null != guidEntities && ! guidEntities.isEmpty()){
       TransactionEntity transactionEntity = guidEntities.get(0);
       responseDTO = Transformer.convertToResponseDTO(transactionEntity);
+      logger.info("Entity found returning it");
     } else{
       responseDTO.setResponseCode("200");
-      responseDTO.setResponseMessage("Did not find Guid: "+ transactionGuid);
+      responseDTO.setResponseMessage("Did not find Guid: "+ transactionGuid);;
+      logger.info("Did not find Guid: "+ transactionGuid);
     }
     return responseDTO;
   }
 
 
   private void writeToAudit(ResponseDTO responseDTO) {
+    logger.info("Writing Audit to mongo");
     mongoAuditService.writeToAudit(responseDTO);
   }
 }
