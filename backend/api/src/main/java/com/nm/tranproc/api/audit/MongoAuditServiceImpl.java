@@ -4,8 +4,11 @@ import com.nm.tranproc.api.response.ResponseDTO;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
+@Service
 public class MongoAuditServiceImpl implements  MongoAuditService{
 
   private final MongoTemplate mongoTemplate;
