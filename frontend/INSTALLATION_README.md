@@ -146,7 +146,7 @@ The project uses:
 
 * Standalone Angular components
 * Zone.js
-* CSS
-* No SSR
-* No SSG/prerendering
-* Standard Angular testing
+* CSS <-- Click
+* No <-- SSR
+* No <-- SSG/prerendering
+* Standard Angular testing <--

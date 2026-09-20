@@ -57,6 +57,12 @@ public class Validator {
       message.append("\n");
       isValid = false;
     }
+
+    if(!StringUtils.isNumeric(request.getCompanyId())){
+      message.append("CompanyId is not numeric");
+      message.append("\n");
+      isValid = false;
+    }
     return isValid;
   }
 
