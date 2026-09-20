@@ -150,3 +150,28 @@ The project uses:
 * No <-- SSR
 * No <-- SSG/prerendering
 * Standard Angular testing <--
+
+---
+## Running this Project
+To run this project open two terminals
+```bash
+cd /opt/projects/Trans-Process-Platf
+# run this command
+./gradlew :backend:api:bootRun
+```
+
+Open second terminal
+```bash
+cd /opt/projects/Trans-Process-Platf/frontend/src/app
+# run this command
+npm start
+# OR
+ng start
+```
+
+**Open browser here :** \
+[http://localhost:4200/](http://localhost:4200/)
+
+http://localhost:4200/
+
+Please refer to **SWAGGER_TEST.md**  for test values
