@@ -2,7 +2,7 @@
 
 ## 1. Purpose and General Rules
 
-All code generated must be human maintainable.
+All code generated must be human-maintainable.
 
 Write readable, maintainable, reliable code. Prefer the simplest solution that meets the requirements (KISS). Avoid over-engineering, clever tricks, duplication, dead code, and speculative generality. Follow SOLID where appropriate and keep methods focused.
 
@@ -19,7 +19,7 @@ Write readable, maintainable, reliable code. Prefer the simplest solution that m
 - Follow the project's established architecture and conventions.
 - Do not introduce new frameworks, libraries, services or infrastructure without approval.
 
-### TOGAFmate Technology Stack
+### Technology Stack
 
 The approved technology stack is:
 
